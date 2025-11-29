@@ -7,7 +7,7 @@ export class Map extends Phaser.Scene {
 
   preload() {
     // Load images for all levels
-    this.load.image('village', 'assets/Piece4.PNG');
+    this.load.image('village', 'assets/piece4.png');
     this.load.image('transport', 'assets/L2P2.PNG');
     this.load.image('chemistry', 'assets/molecule.PNG');
     this.load.image('green-tick', 'assets/green-tick.PNG');

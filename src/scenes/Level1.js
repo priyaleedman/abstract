@@ -13,7 +13,7 @@ export class Level1 extends BaseLevel {
     this.load.image('piece1', 'assets/Piece1.PNG');
     this.load.image('piece2', 'assets/Piece2.PNG');
     this.load.image('piece3', 'assets/Piece3.PNG');
-    this.load.image('piece4', 'assets/Piece4.PNG');
+    this.load.image('piece4', 'assets/piece4.png');
   }
 
   /**
