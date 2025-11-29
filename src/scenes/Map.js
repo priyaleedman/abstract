@@ -11,7 +11,7 @@ export class Map extends Phaser.Scene {
     this.load.image('transport', 'assets/L2P2.PNG');
     this.load.image('chemistry', 'assets/molecule.PNG');
     this.load.image('green-tick', 'assets/green-tick.PNG');
-    this.load.image('green-background', 'assets/green-background.PNG');
+    this.load.image('green-background', 'assets/green-background.png');
   }
 
   create() {

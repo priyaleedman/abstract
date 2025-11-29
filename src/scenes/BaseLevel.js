@@ -12,9 +12,9 @@ export class BaseLevel extends Phaser.Scene {
 
   preload() {
     // Load green tick for solved indicator
-    this.load.image('green-tick', 'assets/green-tick.png');
+    this.load.image('green-tick', 'assets/green-tick.PNG');
     // Load info icon
-    this.load.image('info-icon', 'assets/info.png');
+    this.load.image('info-icon', 'assets/info.PNG');
   }
 
   create() {
