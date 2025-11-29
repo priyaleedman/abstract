@@ -10,10 +10,10 @@ export class Level1 extends BaseLevel {
 
   preload() {
     super.preload(); // Load base level assets (green-tick)
-    this.load.image('piece1', 'assets/Piece1.png');
-    this.load.image('piece2', 'assets/Piece2.png');
-    this.load.image('piece3', 'assets/Piece3.png');
-    this.load.image('piece4', 'assets/Piece4.png');
+    this.load.image('piece1', 'assets/Piece1.PNG');
+    this.load.image('piece2', 'assets/Piece2.PNG');
+    this.load.image('piece3', 'assets/Piece3.PNG');
+    this.load.image('piece4', 'assets/Piece4.PNG');
   }
 
   /**
