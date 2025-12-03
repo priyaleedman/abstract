@@ -31,7 +31,7 @@ export class Map extends Phaser.Scene {
 
     // === Level 2 (Bottom Left - Transport, shifted slightly right) ===
     const level2X = centerX - horizontalOffset + 60; // small nudge right
-    this.createLevelButton('Level2', level2X, bottomY, 'transport', 0.1, verticalLabelOffset, 'Level 2', 0.1, level2X - 10, bottomY + 30);
+    this.createLevelButton('Level2', level2X, bottomY, 'transport', 0.1, verticalLabelOffset, 'Level 2', 0.1, level2X - 10, bottomY + 30, 3.8);
 
     // === Level 3 (Bottom Right - Chemistry) ===
     const level3X = centerX + horizontalOffset;
@@ -47,7 +47,7 @@ export class Map extends Phaser.Scene {
   /**
    * Create a level button with progress indicators
    */
-  createLevelButton(levelKey, x, y, imageKey, imageScale, labelOffsetY, labelText, labelOriginX = 0.5, bgX = null, bgY = null) {
+  createLevelButton(levelKey, x, y, imageKey, imageScale, labelOffsetY, labelText, labelOriginX = 0.5, bgX = null, bgY = null, bgScaleMultiplier = 2.1) {
     const status = ProgressManager.getLevelStatus(levelKey);
     
     // If solved, show green background at 80% transparency
@@ -57,7 +57,7 @@ export class Map extends Phaser.Scene {
         bgY !== null ? bgY : y,
         'green-background'
       )
-        .setScale(imageScale * 2.1)
+        .setScale(imageScale * bgScaleMultiplier)
         .setAlpha(0.4);
       greenBg.setDepth(-1);
     }

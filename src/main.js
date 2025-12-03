@@ -11,7 +11,7 @@ const config = {
   parent: 'game-container',
   width: 1280,
   height: 720,
-  backgroundColor: '#000000',
+  backgroundColor: '#ffffff',
   pixelArt: true,
   scene: [
     Start,
