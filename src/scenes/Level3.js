@@ -52,8 +52,8 @@ export class Level3 extends BaseLevel {
    */
   getPieceLabel(pieceKey, edges) {
     const labels = {
-      'L3piece1': `Hydrogen: ${edges} bonds`,
-      'L3piece2': `Oxygen: ${edges} bonds`,
+      'L3piece1': `Hydrogen: ${edges} bond`,
+      'L3piece2': `Oxygen: ${edges} bond`,
       'L3piece3': `Sulfur: ${edges} bonds`,
       'L3piece4': `Nitrogen: ${edges} bonds`,
       'L3piece5': `Carbon: ${edges} bonds`

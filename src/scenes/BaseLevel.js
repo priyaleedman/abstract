@@ -119,11 +119,14 @@ export class BaseLevel extends Phaser.Scene {
 
   setupSidebar(sidebarX) {
     const total = this.pieceTypes.length;
-    const spacing = 720 / (total + 1);
+    const topPadding = 120; // Reduced top padding
+    const bottomPadding = 120; // Reduced bottom padding
+    const availableHeight = 720 - topPadding - bottomPadding;
+    const spacing = total > 1 ? availableHeight / (total - 1) : 0;
     this.sidebarCounters = [];
 
     this.pieceTypes.forEach((type, i) => {
-      const y = spacing * (i + 1);
+      const y = topPadding + (spacing * i);
       const piece = this.add.image(sidebarX, y, type.key)
         .setScale(type.sidebarScale)
         .setInteractive();

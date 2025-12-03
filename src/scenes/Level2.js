@@ -35,10 +35,10 @@ export class Level2 extends BaseLevel {
    */
   getPieceLabel(pieceKey, edges) {
     const labels = {
-      'L2piece1': `Tram: ${edges} connections`,
-      'L2piece2': `Bus: ${edges} connections`,
-      'L2piece3': `Train: ${edges} connections`,
-      'L2piece4': `Metro: ${edges} connections`
+      'L2piece1': `Tram: ${edges} routes`,
+      'L2piece2': `Bus: ${edges} routes`,
+      'L2piece3': `Train: ${edges} routes`,
+      'L2piece4': `Metro: ${edges} routes`
     };
     return labels[pieceKey] || `Piece: ${edges} edge${edges !== 1 ? 's' : ''}`;
   }
@@ -48,6 +48,10 @@ export class Level2 extends BaseLevel {
    */
   getCountLabelOffset() {
     return { xOffset: 65, yOffset: -20 }; // Lower than default
+  }
+
+  getLabelYOffset() {
+    return 64;
   }
 
   /**

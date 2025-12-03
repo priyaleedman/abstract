@@ -33,7 +33,7 @@ export class Level1 extends BaseLevel {
    */
   getPieceLabel(pieceKey, edges) {
     const labels = {
-      'piece1': `Inn: ${edges} roads`,
+      'piece1': `Inn: ${edges} road`,
       'piece2': `Hamlet: ${edges} roads`,
       'piece3': `Village: ${edges} roads`,
       'piece4': `Town: ${edges} roads`
