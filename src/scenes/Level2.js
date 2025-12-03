@@ -31,6 +31,26 @@ export class Level2 extends BaseLevel {
   }
 
   /**
+   * Level 2 piece labels - customize the sidebar labels
+   */
+  getPieceLabel(pieceKey, edges) {
+    const labels = {
+      'L2piece1': `Tram: ${edges} connections`,
+      'L2piece2': `Bus: ${edges} connections`,
+      'L2piece3': `Train: ${edges} connections`,
+      'L2piece4': `Metro: ${edges} connections`
+    };
+    return labels[pieceKey] || `Piece: ${edges} edge${edges !== 1 ? 's' : ''}`;
+  }
+
+  /**
+   * Override count label position for Level 2 (make it lower)
+   */
+  getCountLabelOffset() {
+    return { xOffset: 65, yOffset: -20 }; // Lower than default
+  }
+
+  /**
    * Level 2 connection rule: all pieces can connect with each other
    */
   canConnectPieces(piece1, piece2) {

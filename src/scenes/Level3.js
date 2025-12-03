@@ -1,107 +1,105 @@
 import { BaseLevel } from './BaseLevel.js';
-// Import connection rule helpers (uncomment to use)
-// import { 
-//   allowAll, 
-//   differentEdgesOnly, 
-//   adjacentEdgesOnly,
-//   hierarchicalConnections,
-//   createCustomRules,
-//   combineRulesAnd,
-//   combineRulesOr,
-//   allowSpecificEdgePairs
-// } from '../helpers/ConnectionRules.js';
+import { createCustomRules } from '../helpers/ConnectionRules.js';
 
 /**
- * Level3 - Advanced puzzle with restricted piece connections
- * Example: Only certain piece types can connect with each other
+ * Level3 - Molecular puzzle with element-specific bonding rules
+ * Build the N-terminus cysteine of a protein following chemical bonding rules
  */
 export class Level3 extends BaseLevel {
   constructor() {
     super('Level3');
+    
+    // Define molecular bonding rules
+    this.bondingRules = createCustomRules({
+      'L3piece1': ['L3piece5', 'L3piece4'], // Hydrogen: carbon, nitrogen
+      'L3piece2': ['L3piece5'],              // Oxygen: carbon
+      'L3piece3': ['L3piece5'],              // Sulfur: carbon
+      'L3piece4': ['L3piece5', 'L3piece1'], // Nitrogen: carbon, hydrogen
+      'L3piece5': ['L3piece1', 'L3piece2', 'L3piece3', 'L3piece4', 'L3piece5'] // Carbon: everything
+    });
   }
 
   preload() {
     super.preload(); // Load base level assets (green-tick)
-    // Load Level 3 specific assets here
-    // Example:
-    // this.load.image('L3piece1', 'assets/L3P1.PNG');
-    // this.load.image('L3piece2', 'assets/L3P2.PNG');
-    // etc.
+    this.load.image('L3piece1', 'assets/L3P1.PNG');
+    this.load.image('L3piece2', 'assets/L3P2.PNG');
+    this.load.image('L3piece3', 'assets/L3P3.PNG');
+    this.load.image('L3piece4', 'assets/L3P4.PNG');
+    this.load.image('L3piece5', 'assets/L3P5.PNG');
   }
 
   /**
-   * Define Level 3 specific pieces
+   * Define Level 3 specific pieces representing molecular elements
+   * L3P1: Hydrogen (1 edge, 17 pieces)
+   * L3P2: Oxygen (1 edge, 7 pieces)
+   * L3P3: Sulfur (2 edges, 1 piece)
+   * L3P4: Nitrogen (3 edges, 12 pieces)
+   * L3P5: Carbon (4 edges, 37 pieces)
+   * Total edges: (1*17) + (1*7) + (2*1) + (3*12) + (4*37) = 17 + 7 + 2 + 36 + 148 = 210 (even) ✓
    */
   getPieceTypes() {
     return [
-      // Example piece definitions
-      // Adjust counts, scales, and edge counts as needed
-      // { key: 'L3piece1', edges: 1, count: 3, scale: 0.06, sidebarScale: 0.07 },
-      // { key: 'L3piece2', edges: 2, count: 4, scale: 0.06, sidebarScale: 0.07 },
-      // { key: 'L3piece3', edges: 3, count: 5, scale: 0.06, sidebarScale: 0.07 },
-      // { key: 'L3piece4', edges: 4, count: 3, scale: 0.06, sidebarScale: 0.07 },
+      { key: 'L3piece1', edges: 1, count: 17, scale: 0.03, sidebarScale: 0.07 }, // Hydrogen
+      { key: 'L3piece2', edges: 1, count: 7, scale: 0.03, sidebarScale: 0.07 },  // Oxygen
+      { key: 'L3piece3', edges: 2, count: 1, scale: 0.03, sidebarScale: 0.07 },  // Sulfur
+      { key: 'L3piece4', edges: 3, count: 12, scale: 0.03, sidebarScale: 0.07 }, // Nitrogen
+      { key: 'L3piece5', edges: 4, count: 37, scale: 0.03, sidebarScale: 0.07 }, // Carbon
     ];
   }
 
   /**
-   * Level 3 connection rule: restricted connections based on piece types
-   * Override this method to define custom connection rules
+   * Level 3 piece labels - customize the sidebar labels
    */
-  canConnectPieces(piece1, piece2) {
-    // ===== EXAMPLE 1: Use a pre-built connection rule =====
-    // Uncomment to use different edge counts only
-    // return differentEdgesOnly(piece1, piece2);
-    
-    // ===== EXAMPLE 2: Use adjacent edges only =====
-    // Only allows pieces with edge counts that differ by 1
-    // return adjacentEdgesOnly(piece1, piece2);
-    
-    // ===== EXAMPLE 3: Use hierarchical connections =====
-    // Pieces with fewer edges can only connect to pieces with more edges
-    // return hierarchicalConnections(piece1, piece2);
-    
-    // ===== EXAMPLE 4: Custom rules based on piece type keys =====
-    // const myRules = createCustomRules({
-    //   'L3piece1': ['L3piece2', 'L3piece3'],
-    //   'L3piece2': ['L3piece1', 'L3piece4'],
-    //   'L3piece3': ['L3piece1', 'L3piece4'],
-    //   'L3piece4': ['L3piece2', 'L3piece3'],
-    // });
-    // return myRules(piece1, piece2);
-    
-    // ===== EXAMPLE 5: Combine multiple rules =====
-    // Both rules must be true (AND logic)
-    // return combineRulesAnd(differentEdgesOnly, adjacentEdgesOnly)(piece1, piece2);
-    
-    // ===== EXAMPLE 6: Allow specific edge pairs =====
-    // Only allow 1<->2, 2<->3, and 3<->4 connections
-    // return allowSpecificEdgePairs([[1, 2], [2, 3], [3, 4]])(piece1, piece2);
-    
-    // ===== EXAMPLE 7: Manual custom logic =====
-    // Write your own logic directly
-    // if (piece1.edgeCount === 1 && piece2.edgeCount === 1) {
-    //   return false; // Pieces with 1 edge cannot connect to each other
-    // }
-    // return true;
-
-    // Default: allow all connections (replace with your custom logic)
-    return true;
+  getPieceLabel(pieceKey, edges) {
+    const labels = {
+      'L3piece1': `Hydrogen: ${edges} bonds`,
+      'L3piece2': `Oxygen: ${edges} bonds`,
+      'L3piece3': `Sulfur: ${edges} bonds`,
+      'L3piece4': `Nitrogen: ${edges} bonds`,
+      'L3piece5': `Carbon: ${edges} bonds`
+    };
+    return labels[pieceKey] || `Piece: ${edges} edge${edges !== 1 ? 's' : ''}`;
   }
 
   /**
-   * Optional: Override checkSolved if you need custom win conditions
-   * For example, require a specific graph structure or pattern
+   * Override label Y offset for Level 3 (pieces are smaller, so bring label closer)
    */
-  // checkSolved() {
-  //   const allPlaced = this.pieceTypes.every(t => t.count === 0);
-  //   const allConnectedPoints = this.pieces.every(p => p.connections.length === p.edgeCount);
-  //   if (!allPlaced || !allConnectedPoints) return;
-  //   if (!this.isGraphConnected()) return;
-  //   
-  //   // Add custom win condition here
-  //   // Example: Check if the graph forms a specific pattern
-  //   // if (!this.hasSpecificPattern()) return;
-  //   
-  //   this.showSolvedScreen();
-  // }
+  getLabelYOffset() {
+    return 42; // Smaller offset for Level 3's smaller pieces
+  }
+
+  /**
+   * Override count label position for Level 3 (make it lower)
+   */
+  getCountLabelOffset() {
+    return { xOffset: 55, yOffset: -20 }; // Lower than default
+  }
+
+  /**
+   * Level 3 connection rule: elements can only bond according to molecular rules
+   * Hydrogen: carbon, nitrogen
+   * Oxygen: carbon
+   * Sulfur: carbon
+   * Nitrogen: carbon, hydrogen
+   * Carbon: everything
+   */
+  canConnectPieces(piece1, piece2) {
+    return this.bondingRules(piece1, piece2);
+  }
+
+  /**
+   * Level 3 instructions
+   */
+  getLevelInstructions() {
+    return `**Objective:**  You are a researcher in a molecular biology lab tasked with building the N-terminus cysteine of a protein. You must correctly bond hydrogen, carbon, nitrogen, oxygen and sulfur atoms following the laws of chemistry.
+
+**Bonding Rules:**
+• Hydrogen (H): bonds with carbon, nitrogen
+• Oxygen (O): bonds with carbon
+• Sulfur (S): bonds with carbon
+• Nitrogen (N): bonds with carbon, hydrogen
+• Carbon (C): bonds with everything
+
+**Win Condition:**  All pieces placed and fully connected following the bonding rules.`;
+  }
 }

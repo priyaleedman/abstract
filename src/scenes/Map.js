@@ -31,11 +31,11 @@ export class Map extends Phaser.Scene {
 
     // === Level 2 (Bottom Left - Transport, shifted slightly right) ===
     const level2X = centerX - horizontalOffset + 60; // small nudge right
-    this.createLevelButton('Level2', level2X, bottomY, 'transport', 0.1, verticalLabelOffset, 'Level 2', 0.1);
+    this.createLevelButton('Level2', level2X, bottomY, 'transport', 0.1, verticalLabelOffset, 'Level 2', 0.1, level2X - 10, bottomY + 30);
 
     // === Level 3 (Bottom Right - Chemistry) ===
     const level3X = centerX + horizontalOffset;
-    this.createLevelButton('Level3', level3X, bottomY, 'chemistry', 0.2, 135, 'Level 3');
+    this.createLevelButton('Level3', level3X, bottomY, 'chemistry', 0.2, 135, 'Level 3', 0.5, level3X - 10, bottomY + 30);
 
     // === Back Button ===
     const backButton = this.add.text(50, 50, 'Back', { fontSize: '20px', color: '#007BFF' })

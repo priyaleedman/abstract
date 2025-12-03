@@ -72,6 +72,41 @@ export class BaseLevel extends Phaser.Scene {
   }
 
   /**
+   * Override this method in child classes to define custom piece labels
+   * @param {string} pieceKey - The piece type key
+   * @param {number} edges - Number of edges for this piece
+   * @returns {string} Label text to display under the piece
+   */
+  getPieceLabel(pieceKey, edges) {
+    // Default implementation - can be overridden in child classes
+    return `Piece: ${edges} edge${edges !== 1 ? 's' : ''}`;
+  }
+
+  /**
+   * Override this method in child classes to customize label positioning
+   * @returns {number} Y offset for the label below the piece
+   */
+  getLabelYOffset() {
+    return 60; // Default offset
+  }
+
+  /**
+   * Override this method in child classes to customize label X positioning
+   * @returns {number} X offset for the label (relative to sidebarX)
+   */
+  getLabelXOffset() {
+    return 0; // Default offset (centered)
+  }
+
+  /**
+   * Override this method in child classes to customize piece count position
+   * @returns {Object} Object with xOffset and yOffset for the count label
+   */
+  getCountLabelOffset() {
+    return { xOffset: 65, yOffset: -35 }; // Default offset
+  }
+
+  /**
    * Override this method in child classes to define connection rules
    * @param {Phaser.GameObjects.Image} piece1 
    * @param {Phaser.GameObjects.Image} piece2 
@@ -93,11 +128,23 @@ export class BaseLevel extends Phaser.Scene {
         .setScale(type.sidebarScale)
         .setInteractive();
 
-      const counterText = this.add.text(sidebarX + 60, y + 55, `x${type.count}`, {
+      // Counter text - moved to top right
+      const countOffset = this.getCountLabelOffset();
+      const counterText = this.add.text(sidebarX + countOffset.xOffset, y + countOffset.yOffset, `x${type.count}`, {
         fontSize: '16px',
         color: '#000'
-      }).setOrigin(1, 0);
+      }).setOrigin(0.5, 0.5);
       this.sidebarCounters.push(counterText);
+
+      // Label under piece with name and edge count
+      const pieceLabel = this.getPieceLabel ? this.getPieceLabel(type.key, type.edges) : `Piece ${i + 1}: ${type.edges} edge${type.edges !== 1 ? 's' : ''}`;
+      const labelYOffset = this.getLabelYOffset();
+      const labelXOffset = this.getLabelXOffset();
+      this.add.text(sidebarX + labelXOffset, y + labelYOffset, pieceLabel, {
+        fontSize: '14px',
+        color: '#999999',
+        align: 'center'
+      }).setOrigin(0.5, 0);
 
       piece.on('pointerdown', () => {
         if (type.count > 0) {
