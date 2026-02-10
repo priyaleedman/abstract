@@ -27,20 +27,20 @@ export class Map extends Phaser.Scene {
     const verticalLabelOffset = 140; // how far labels appear below images
 
     // === Level 1 (Top - Village) ===
-    this.createLevelButton('Level1', centerX, topY, 'village', 0.18, verticalLabelOffset, 'Level 1', 0.5, centerX - 10, topY + 30);
+    this.createLevelButton('Level1', centerX, topY, 'village', 0.18, verticalLabelOffset, 'Crossroads and cott-edge-s', 0.5, centerX - 10, topY + 30);
 
     // === Level 2 (Bottom Left - Transport, shifted slightly right) ===
     const level2X = centerX - horizontalOffset + 60; // small nudge right
-    this.createLevelButton('Level2', level2X, bottomY, 'transport', 0.1, verticalLabelOffset, 'Level 2', 0.1, level2X - 10, bottomY + 30, 3.8);
+    this.createLevelButton('Level2', level2X, bottomY, 'transport', 0.1, verticalLabelOffset, 'Quicker to bi-cycle', 0.1, level2X - 10, bottomY + 30, 3.8);
 
     // === Level 3 (Bottom Right - Chemistry) ===
     const level3X = centerX + horizontalOffset;
-    this.createLevelButton('Level3', level3X, bottomY, 'chemistry', 0.2, 135, 'Level 3', 0.5, level3X - 10, bottomY + 30);
+    this.createLevelButton('Level3', level3X, bottomY, 'chemistry', 0.2, 135, 'Can\'t say no[de] to coffee', 0.5, level3X - 10, bottomY + 30);
 
     // === Back Button ===
-    const backButton = this.add.text(50, 50, 'Back', { fontSize: '20px', color: '#007BFF' })
+    const backButton = this.add.text(30, 30, 'Back', { fontSize: '24px', fill: '#007bff' })
       .setInteractive()
-      .setOrigin(0, 0);
+      .setOrigin(0, 0.5);
     backButton.on('pointerdown', () => this.scene.start('Start'));
   }
 

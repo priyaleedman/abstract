@@ -13,11 +13,9 @@ export class BaseLevel extends Phaser.Scene {
   preload() {
     // Load green tick for solved indicator
     this.load.image('green-tick', 'assets/green-tick.PNG');
-    // Load info icon
-    this.load.image('info-icon', 'assets/info.PNG');
   }
 
-  create() {
+  create(data) {
     this.cameras.main.setBackgroundColor('#ffffff');
 
     // Sidebar setup
@@ -25,6 +23,36 @@ export class BaseLevel extends Phaser.Scene {
     const sidebarX = 1280 - sidebarWidth / 2;
     const sidebar = this.add.rectangle(sidebarX, 360, sidebarWidth, 720, 0xf4f4f4);
     sidebar.setStrokeStyle(2, 0xcccccc);
+
+    // Nav bar setup - slightly lighter shade than sidebar, stops at sidebar
+    this.navBarHeight = 60;
+    const navBarWidth = 1280 - sidebarWidth;
+    const navBar = this.add.rectangle(navBarWidth / 2, this.navBarHeight / 2, navBarWidth, this.navBarHeight, 0xf8f8f8);
+    navBar.setStrokeStyle(2, 0xcccccc);
+
+    // Store gameplay boundaries
+    this.gameplayBounds = {
+      minX: 50,
+      maxX: 1280 - sidebarWidth - 50,
+      minY: this.navBarHeight + 50,
+      maxY: 670
+    };
+
+    // Store sidebar boundaries for piece removal
+    this.sidebarBounds = {
+      minX: 1280 - sidebarWidth,
+      maxX: 1280,
+      minY: 0,
+      maxY: 720
+    };
+
+    // Store nav bar boundaries
+    this.navBarBounds = {
+      minX: 0,
+      maxX: navBarWidth,
+      minY: 0,
+      maxY: this.navBarHeight
+    };
 
     // Get level-specific piece definitions
     this.pieceTypes = this.getPieceTypes();
@@ -38,29 +66,36 @@ export class BaseLevel extends Phaser.Scene {
     this.clickThreshold = 6;
     this.isViewingSolved = false;
 
+    // Check if we should skip instructions (from reset or data parameter)
+    const skipInstructions = data && data.skipInstructions;
+
     // Check if level is already solved
     const levelStatus = ProgressManager.getLevelStatus(this.levelKey);
     if (levelStatus === 'solved') {
       this.isViewingSolved = true;
+      // Set all piece counts to 0 for solved level sidebar
+      this.pieceTypes.forEach(type => {
+        type.count = 0;
+      });
+      // Setup sidebar with greyed out pieces
+      this.setupSidebar(sidebarX);
       this.loadSolvedLevel();
       this.showSolvedIndicator(sidebarX);
+      this.addBackButton(); // Add back button in nav bar
     } else {
       // Setup sidebar piece buttons (only if not viewing solved)
       this.setupSidebar(sidebarX);
       // Try to load any saved progress
       this.loadProgress();
-      // Add Reset button for unsolved levels
-      this.addResetButton();
-      // Add Info button for unsolved levels
+      // Add buttons in nav bar
+      this.addBackButton();
       this.addInfoButton();
-      // Show instructions on first entry
-      this.showInstructions();
+      this.addResetButton();
+      // Show instructions on first entry (unless skipped)
+      if (!skipInstructions) {
+        this.showInstructions();
+      }
     }
-
-    // Back button
-    this.add.text(30, 30, 'Back', { fontSize: '24px', fill: '#007bff' })
-      .setInteractive()
-      .on('pointerdown', () => this.scene.start('Map'));
   }
 
   /**
@@ -124,12 +159,15 @@ export class BaseLevel extends Phaser.Scene {
     const availableHeight = 720 - topPadding - bottomPadding;
     const spacing = total > 1 ? availableHeight / (total - 1) : 0;
     this.sidebarCounters = [];
+    this.sidebarPieces = []; // Store references to sidebar pieces
 
     this.pieceTypes.forEach((type, i) => {
       const y = topPadding + (spacing * i);
       const piece = this.add.image(sidebarX, y, type.key)
         .setScale(type.sidebarScale)
         .setInteractive();
+
+      this.sidebarPieces.push(piece); // Store reference
 
       // Counter text - moved to top right
       const countOffset = this.getCountLabelOffset();
@@ -149,11 +187,20 @@ export class BaseLevel extends Phaser.Scene {
         align: 'center'
       }).setOrigin(0.5, 0);
 
+      // Grey out piece if count is already 0 (e.g., when viewing solved level)
+      if (type.count === 0) {
+        piece.setTint(0x888888);
+      }
+
       piece.on('pointerdown', () => {
         if (type.count > 0) {
           this.spawnPiece(type);
           type.count -= 1;
           counterText.setText(`x${type.count}`);
+          // Grey out piece if count reaches 0
+          if (type.count === 0) {
+            piece.setTint(0x888888);
+          }
           this.saveProgress(); // Save progress when piece is placed
         }
       });
@@ -161,8 +208,9 @@ export class BaseLevel extends Phaser.Scene {
   }
 
   spawnPiece(type, spawnX = null, spawnY = null, enableInteraction = true) {
-    const x = spawnX !== null ? spawnX : Phaser.Math.Between(200, 1000);
-    const y = spawnY !== null ? spawnY : Phaser.Math.Between(100, 600);
+    // Use gameplay bounds for random spawning
+    const x = spawnX !== null ? spawnX : Phaser.Math.Between(this.gameplayBounds.minX + 100, this.gameplayBounds.maxX - 100);
+    const y = spawnY !== null ? spawnY : Phaser.Math.Between(this.gameplayBounds.minY + 50, this.gameplayBounds.maxY - 50);
     const piece = this.add.image(x, y, type.key)
       .setScale(type.scale);
 
@@ -204,11 +252,24 @@ export class BaseLevel extends Phaser.Scene {
 
       piece.on('drag', (pointer, dragX, dragY) => {
         piece._wasDragged = true;
-        if (this.wouldCauseIntersection(piece, dragX, dragY)) {
-          piece.x = piece.prevX;
-          piece.y = piece.prevY;
-          return;
+        
+        // Allow dragging anywhere (including sidebar and navbar for removal)
+        // but constrain to gameplay bounds if not in removal areas
+        const inSidebar = dragX >= this.sidebarBounds.minX;
+        const inNavBar = dragY <= this.navBarBounds.maxY && dragX <= this.navBarBounds.maxX;
+        
+        if (!inSidebar && !inNavBar) {
+          // Constrain to gameplay bounds
+          dragX = Math.max(this.gameplayBounds.minX, Math.min(dragX, this.gameplayBounds.maxX));
+          dragY = Math.max(this.gameplayBounds.minY, Math.min(dragY, this.gameplayBounds.maxY));
+          
+          if (this.wouldCauseIntersection(piece, dragX, dragY)) {
+            piece.x = piece.prevX;
+            piece.y = piece.prevY;
+            return;
+          }
         }
+        
         piece.x = dragX;
         piece.y = dragY;
         piece.prevX = dragX;
@@ -218,7 +279,14 @@ export class BaseLevel extends Phaser.Scene {
 
       piece.on('dragend', () => {
         piece._isDragging = false;
-        this.checkSolved();
+        
+        // Check if piece was dropped in sidebar or navbar (removal areas)
+        if (this.isPieceInRemovalArea(piece)) {
+          this.removePiece(piece);
+        } else {
+          this.checkSolved();
+        }
+        
         // Save progress after each move
         this.saveProgress();
       });
@@ -226,6 +294,71 @@ export class BaseLevel extends Phaser.Scene {
 
     this.pieces.push(piece);
     return piece;
+  }
+
+  /**
+   * Check if a piece is in a removal area (sidebar or navbar)
+   */
+  isPieceInRemovalArea(piece) {
+    const inSidebar = piece.x >= this.sidebarBounds.minX &&
+                      piece.x <= this.sidebarBounds.maxX &&
+                      piece.y >= this.sidebarBounds.minY &&
+                      piece.y <= this.sidebarBounds.maxY;
+    
+    const inNavBar = piece.x >= this.navBarBounds.minX &&
+                     piece.x <= this.navBarBounds.maxX &&
+                     piece.y >= this.navBarBounds.minY &&
+                     piece.y <= this.navBarBounds.maxY;
+    
+    return inSidebar || inNavBar;
+  }
+
+  /**
+   * Remove a piece from the game and return it to the sidebar
+   */
+  removePiece(piece) {
+    // Find the piece type
+    const pieceType = this.pieceTypes.find(t => t.key === piece.pieceType);
+    if (!pieceType) return;
+
+    // Remove all edges connected to this piece
+    const connectedPieces = [...piece.connections];
+    connectedPieces.forEach(otherPiece => {
+      // Remove edge from edges array
+      this.edges = this.edges.filter(e => 
+        !((e.p1 === piece && e.p2 === otherPiece) || 
+          (e.p1 === otherPiece && e.p2 === piece))
+      );
+      
+      // Remove from connections
+      otherPiece.connections = otherPiece.connections.filter(p => p !== piece);
+    });
+
+    // Remove piece from pieces array
+    const pieceIndex = this.pieces.indexOf(piece);
+    if (pieceIndex > -1) {
+      this.pieces.splice(pieceIndex, 1);
+    }
+
+    // Increment the count for this piece type
+    pieceType.count += 1;
+
+    // Update sidebar counter
+    const typeIndex = this.pieceTypes.indexOf(pieceType);
+    if (this.sidebarCounters[typeIndex]) {
+      this.sidebarCounters[typeIndex].setText(`x${pieceType.count}`);
+    }
+
+    // Remove grey tint from sidebar piece if count is now > 0
+    if (pieceType.count > 0 && this.sidebarPieces && this.sidebarPieces[typeIndex]) {
+      this.sidebarPieces[typeIndex].clearTint();
+    }
+
+    // Destroy the piece
+    piece.destroy();
+
+    // Redraw edges
+    this.redrawEdges();
   }
 
   handlePieceClick(piece) {
@@ -395,7 +528,7 @@ export class BaseLevel extends Phaser.Scene {
     const overlay = this.add.rectangle(640, 360, 1280, 720, 0xffffff, 0.95).setDepth(5);
     
     // Center aligned text
-    this.add.text(640, 320, 'Level Solved!', { 
+    this.add.text(640, 280, 'Level Solved!', { 
       fontSize: '40px', 
       color: '#000',
       align: 'center'
@@ -403,8 +536,22 @@ export class BaseLevel extends Phaser.Scene {
       .setOrigin(0.5, 0.5)
       .setDepth(6);
 
+    // View solved level button - center aligned
+    this.add.text(640, 360, 'View Solved Level', { 
+      fontSize: '28px', 
+      fill: '#007bff',
+      align: 'center'
+    })
+      .setOrigin(0.5, 0.5)
+      .setInteractive()
+      .on('pointerdown', () => {
+        // Reload the scene to view the solved level
+        this.scene.restart();
+      })
+      .setDepth(6);
+
     // Return to map button - center aligned
-    this.add.text(640, 400, 'Return to Map', { 
+    this.add.text(640, 410, 'Return to Map', { 
       fontSize: '28px', 
       fill: '#007bff',
       align: 'center'
@@ -471,10 +618,14 @@ export class BaseLevel extends Phaser.Scene {
           type.count = savedType.count;
         }
       });
-      // Update sidebar counters
+      // Update sidebar counters and grey out pieces if count is 0
       this.pieceTypes.forEach((type, i) => {
         if (this.sidebarCounters[i]) {
           this.sidebarCounters[i].setText(`x${type.count}`);
+        }
+        // Grey out sidebar piece if count is 0
+        if (type.count === 0 && this.sidebarPieces && this.sidebarPieces[i]) {
+          this.sidebarPieces[i].setTint(0x888888);
         }
       });
     }
@@ -504,42 +655,50 @@ export class BaseLevel extends Phaser.Scene {
   }
 
   /**
-   * Add Reset button for unsolved levels (left of sidebar)
+   * Add Back button in nav bar
    */
-  addResetButton() {
-    const resetButton = this.add.text(1000, 30, 'Reset', { 
+  addBackButton() {
+    this.add.text(30, this.navBarHeight / 2, 'Back', { 
       fontSize: '24px', 
       fill: '#007bff' 
     })
       .setInteractive()
-      .setOrigin(1, 0);
-    
-    resetButton.on('pointerdown', () => {
-      ProgressManager.clearInProgressLevel(this.levelKey);
-      this.scene.restart();
-    });
+      .setOrigin(0, 0.5)
+      .on('pointerdown', () => this.scene.start('Map'));
   }
 
   /**
-   * Add Info button for unsolved levels (left of reset button)
+   * Add Info button in nav bar (center-left area)
    */
   addInfoButton() {
-    const infoButton = this.add.image(895, 44, 'info-icon')
-      .setScale(0.05)
+    const navBarCenterY = this.navBarHeight / 2;
+    this.add.text(860, navBarCenterY, 'Info', { 
+      fontSize: '24px', 
+      fill: '#007bff' 
+    })
       .setInteractive()
-      .setOrigin(0.5);
+      .setOrigin(0.5, 0.5)
+      .on('pointerdown', () => {
+        this.showInstructions();
+      });
+  }
+
+  /**
+   * Add Reset button in nav bar (center area)
+   */
+  addResetButton() {
+    const navBarCenterY = this.navBarHeight / 2;
+    const resetButton = this.add.text(960, navBarCenterY, 'Reset', { 
+      fontSize: '24px', 
+      fill: '#007bff' 
+    })
+      .setInteractive()
+      .setOrigin(0.5, 0.5);
     
-    infoButton.on('pointerdown', () => {
-      this.showInstructions();
-    });
-
-    // Add hover effect
-    infoButton.on('pointerover', () => {
-      infoButton.setScale(0.06);
-    });
-
-    infoButton.on('pointerout', () => {
-      infoButton.setScale(0.05);
+    resetButton.on('pointerdown', () => {
+      ProgressManager.clearInProgressLevel(this.levelKey);
+      // Restart with flag to skip instructions
+      this.scene.restart({ skipInstructions: true });
     });
   }
 
@@ -709,38 +868,41 @@ export class BaseLevel extends Phaser.Scene {
   }
 
   /**
-   * Show the "Solved" indicator and "Redo level" button
+   * Show the "Solved" indicator and "Redo level" button in nav bar
    */
   showSolvedIndicator(sidebarX) {
-    // "Redo level" button (right-aligned, same size as Back button) - on top
-    const redoButton = this.add.text(1250, 30, 'Redo Level', {
+    const navBarCenterY = this.navBarHeight / 2;
+
+    // Create tick first to get its width
+    const tick = this.add.image(0, navBarCenterY, 'green-tick')
+      .setScale(0.025);
+    const tickWidth = tick.displayWidth;
+
+    // "Solved" text with tick at Info button position (860)
+    const spacing = 5;
+    const solvedTextX = 800;
+    const solvedText = this.add.text(solvedTextX - tickWidth / 2 - spacing, navBarCenterY, 'Solved', {
+      fontSize: '24px',
+      color: '#00aa00',
+      fontStyle: 'bold'
+    }).setOrigin(1, 0.5);
+
+    // Position tick right after the text, centered vertically
+    tick.setPosition(solvedText.x + spacing, navBarCenterY);
+    tick.setOrigin(0, 0.5);
+
+    // "Redo level" button at Reset button position (960)
+    const redoButton = this.add.text(920, navBarCenterY, 'Redo Level', {
       fontSize: '24px',
       fill: '#007bff'
     })
       .setInteractive()
-      .setOrigin(1, 0);
+      .setOrigin(0.5, 0.5);
 
     redoButton.on('pointerdown', () => {
       ProgressManager.clearLevel(this.levelKey);
       this.scene.restart();
     });
-
-    // Create tick first to get its width (slightly larger)
-    const tick = this.add.image(0, 82, 'green-tick')
-      .setScale(0.025);
-    const tickWidth = tick.displayWidth;
-
-    // Position "Solved" text so that text + spacing + tick aligns to right edge - on bottom
-    const spacing = 5;
-    const solvedText = this.add.text(1250 - tickWidth - spacing, 70, 'Solved', {
-      fontSize: '24px',
-      color: '#00aa00',
-      fontStyle: 'bold'
-    }).setOrigin(1, 0);
-
-    // Position tick right after the text
-    tick.setPosition(solvedText.x + spacing, 82);
-    tick.setOrigin(0, 0.5);
   }
 }
 
