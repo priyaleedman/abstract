@@ -63,7 +63,8 @@ export class BaseLevel extends Phaser.Scene {
     this.selectedPiece = null;
     this._highlightedPiece = null;
     this.graphics = this.add.graphics().setDepth(0);
-    this.clickThreshold = 6;
+    this.clickThreshold = 10;
+    this.input.dragDistanceThreshold = this.clickThreshold;
     this.isViewingSolved = false;
 
     // Check if we should skip instructions (from reset or data parameter)
