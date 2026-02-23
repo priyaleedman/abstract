@@ -64,6 +64,10 @@ export class Level3 extends BaseLevel {
   /**
    * Override label Y offset for Level 3 (pieces are smaller, so bring label closer)
    */
+  getBadgeOffset() {
+    return { xOffset: 24, yOffset: -24 };
+  }
+
   getLabelYOffset() {
     return 42; // Smaller offset for Level 3's smaller pieces
   }

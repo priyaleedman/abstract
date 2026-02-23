@@ -144,6 +144,14 @@ export class BaseLevel extends Phaser.Scene {
   }
 
   /**
+   * Override this method in child classes to customize badge position
+   * @returns {Object} Object with xOffset and yOffset for the remaining-edges badge
+   */
+  getBadgeOffset() {
+    return { xOffset: 40, yOffset: -40 };
+  }
+
+  /**
    * Override this method in child classes to customize terminology
    * @returns {Object} Mapping of generic terms to level-specific terms
    */
@@ -244,6 +252,7 @@ export class BaseLevel extends Phaser.Scene {
       piece.on('dragstart', (pointer) => {
         if (type.count <= 0) return;
         piece._sidebarDragging = true;
+        this._anyPieceDragging = true;
 
         // Create a ghost piece that follows the pointer
         const ghost = this.add.image(pointer.x, pointer.y, type.key)
@@ -266,6 +275,7 @@ export class BaseLevel extends Phaser.Scene {
       piece.on('dragend', (pointer) => {
         if (!piece._sidebarDragging) return;
         piece._sidebarDragging = false;
+        this._anyPieceDragging = false;
         piece.setScale(baseSidebarScale);
 
         const ghost = piece._ghostPiece;
@@ -351,6 +361,11 @@ export class BaseLevel extends Phaser.Scene {
         piece._dragStartY = piece.y;
         piece.prevX = piece.x;
         piece.prevY = piece.y;
+        piece.setDepth(5);
+        if (piece._badge) {
+          piece._badge.setDepth(6);
+          piece._badgeText.setDepth(6);
+        }
       });
 
       piece.on('drag', (pointer, dragX, dragY) => {
@@ -378,12 +393,18 @@ export class BaseLevel extends Phaser.Scene {
         piece.prevX = dragX;
         piece.prevY = dragY;
         this.redrawEdges();
+        this.updateBadge(piece);
       });
 
       piece.on('dragend', () => {
         piece._isDragging = false;
         this._anyPieceDragging = false;
         piece.setScale(baseScale);
+        piece.setDepth(1);
+        if (piece._badge) {
+          piece._badge.setDepth(3);
+          piece._badgeText.setDepth(3);
+        }
         
         // Check if piece was dropped in sidebar or navbar (removal areas)
         if (this.isPieceInRemovalArea(piece)) {
@@ -395,6 +416,7 @@ export class BaseLevel extends Phaser.Scene {
           piece.prevX = piece._dragStartX;
           piece.prevY = piece._dragStartY;
           this.redrawEdges();
+          this.updateBadge(piece);
           this.showNotification(`${t.pieces.charAt(0).toUpperCase() + t.pieces.slice(1)} cannot overlap each other.`);
         } else if (this.isOverlappingEdge(piece)) {
           const t = this.getTerminology();
@@ -403,6 +425,7 @@ export class BaseLevel extends Phaser.Scene {
           piece.prevX = piece._dragStartX;
           piece.prevY = piece._dragStartY;
           this.redrawEdges();
+          this.updateBadge(piece);
           this.showNotification(`A ${t.piece} cannot be placed on top of a ${t.connection}.`);
         } else {
           this.checkSolved();
@@ -414,7 +437,51 @@ export class BaseLevel extends Phaser.Scene {
     }
 
     this.pieces.push(piece);
+
+    if (enableInteraction && !this.isViewingSolved) {
+      this.createBadge(piece);
+    }
+
     return piece;
+  }
+
+  createBadge(piece) {
+    const remaining = piece.edgeCount - piece.connections.length;
+    const { xOffset, yOffset } = this.getBadgeOffset();
+    const radius = 12;
+
+    const bg = this.add.circle(piece.x + xOffset, piece.y + yOffset, radius, 0xaaaaaa, 0.85)
+      .setDepth(3);
+    const text = this.add.text(piece.x + xOffset, piece.y + yOffset, `${remaining}`, {
+      fontSize: '13px',
+      color: '#fff',
+      fontStyle: 'bold'
+    }).setOrigin(0.5, 0.5).setDepth(3);
+
+    const visible = remaining > 0;
+    bg.setVisible(visible);
+    text.setVisible(visible);
+
+    piece._badge = bg;
+    piece._badgeText = text;
+  }
+
+  updateBadge(piece) {
+    if (!piece._badge) return;
+    const remaining = piece.edgeCount - piece.connections.length;
+    const { xOffset, yOffset } = this.getBadgeOffset();
+
+    piece._badge.setPosition(piece.x + xOffset, piece.y + yOffset);
+    piece._badgeText.setPosition(piece.x + xOffset, piece.y + yOffset);
+
+    if (remaining > 0) {
+      piece._badge.setVisible(true);
+      piece._badgeText.setText(`${remaining}`);
+      piece._badgeText.setVisible(true);
+    } else {
+      piece._badge.setVisible(false);
+      piece._badgeText.setVisible(false);
+    }
   }
 
   /**
@@ -445,14 +512,12 @@ export class BaseLevel extends Phaser.Scene {
     // Remove all edges connected to this piece
     const connectedPieces = [...piece.connections];
     connectedPieces.forEach(otherPiece => {
-      // Remove edge from edges array
       this.edges = this.edges.filter(e => 
         !((e.p1 === piece && e.p2 === otherPiece) || 
           (e.p1 === otherPiece && e.p2 === piece))
       );
-      
-      // Remove from connections
       otherPiece.connections = otherPiece.connections.filter(p => p !== piece);
+      this.updateBadge(otherPiece);
     });
 
     // Remove piece from pieces array
@@ -475,7 +540,13 @@ export class BaseLevel extends Phaser.Scene {
       this.sidebarPieces[typeIndex].clearTint();
     }
 
-    // Destroy the piece
+    // Destroy badge and piece
+    if (piece._badge) {
+      piece._badge.destroy();
+      piece._badgeText.destroy();
+      piece._badge = null;
+      piece._badgeText = null;
+    }
     piece.destroy();
 
     // Redraw edges
@@ -521,8 +592,10 @@ export class BaseLevel extends Phaser.Scene {
       this._highlightedPiece = null;
       this.selectedPiece = null;
       this.redrawEdges();
+      this.updateBadge(a);
+      this.updateBadge(b);
       this.checkSolved();
-      this.saveProgress(); // Save progress after removing edge
+      this.saveProgress();
       return;
     }
 
@@ -565,8 +638,10 @@ export class BaseLevel extends Phaser.Scene {
     this._highlightedPiece = null;
     this.selectedPiece = null;
     this.redrawEdges();
+    this.updateBadge(a);
+    this.updateBadge(b);
     this.checkSolved();
-    this.saveProgress(); // Save progress after adding edge
+    this.saveProgress();
   }
 
   /**
@@ -883,8 +958,9 @@ export class BaseLevel extends Phaser.Scene {
       }
     });
 
-    // Draw all edges
+    // Draw all edges and update badges to reflect loaded connections
     this.redrawEdges();
+    this.pieces.forEach(p => this.updateBadge(p));
   }
 
   /**

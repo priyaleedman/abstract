@@ -46,6 +46,10 @@ export class Level2 extends BaseLevel {
   /**
    * Override count label position for Level 2 (make it lower)
    */
+  getBadgeOffset() {
+    return { xOffset: 30, yOffset: -28 };
+  }
+
   getCountLabelOffset() {
     return { xOffset: 65, yOffset: -20 }; // Lower than default
   }

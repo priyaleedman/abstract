@@ -41,6 +41,10 @@ export class Level1 extends BaseLevel {
     return labels[pieceKey] || `Piece: ${edges} edge${edges !== 1 ? 's' : ''}`;
   }
 
+  getBadgeOffset() {
+    return { xOffset: 48, yOffset: -25 };
+  }
+
   getTerminology() {
     return {
       piece: 'settlement',
