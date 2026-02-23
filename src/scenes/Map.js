@@ -46,8 +46,16 @@ export class Map extends Phaser.Scene {
 
     // === Back Button ===
     const backButton = this.add.text(30, 30, 'Back', { fontSize: '24px', fill: '#007bff' })
-      .setInteractive()
+      .setInteractive({ useHandCursor: true })
       .setOrigin(0, 0.5);
+    backButton.on('pointerover', () => {
+      backButton.setScale(1.08);
+      backButton.setStyle({ fontStyle: 'bold' });
+    });
+    backButton.on('pointerout', () => {
+      backButton.setScale(1);
+      backButton.setStyle({ fontStyle: 'normal' });
+    });
     backButton.on('pointerdown', () => this.scene.start('Start'));
   }
 
@@ -71,12 +79,22 @@ export class Map extends Phaser.Scene {
 
     // Level image
     const levelImage = this.add.image(x, y, imageKey)
-      .setInteractive()
+      .setInteractive({ useHandCursor: true })
       .setScale(imageScale);
 
     // Level label
-    this.add.text(x, y + labelOffsetY, labelText, { fontSize: '24px', color: '#000' })
+    const label = this.add.text(x, y + labelOffsetY, labelText, { fontSize: '24px', color: '#000' })
       .setOrigin(labelOriginX);
+
+    // Hover effect for level buttons
+    levelImage.on('pointerover', () => {
+      levelImage.setScale(imageScale * 1.1);
+      label.setStyle({ fontStyle: 'bold' });
+    });
+    levelImage.on('pointerout', () => {
+      levelImage.setScale(imageScale);
+      label.setStyle({ fontStyle: 'normal' });
+    });
 
     // If solved, show smaller green tick more right and up
     if (status === 'solved') {

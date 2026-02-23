@@ -41,6 +41,15 @@ export class Level1 extends BaseLevel {
     return labels[pieceKey] || `Piece: ${edges} edge${edges !== 1 ? 's' : ''}`;
   }
 
+  getTerminology() {
+    return {
+      piece: 'settlement',
+      pieces: 'settlements',
+      connection: 'road',
+      connections: 'roads',
+    };
+  }
+
   /**
    * Level 1 connection rule: all pieces can connect with each other
    */
@@ -52,15 +61,17 @@ export class Level1 extends BaseLevel {
    * Level 1 instructions
    */
   getLevelInstructions() {
-    return `**Objective:**  Your ruler has tasked you with building a series of villages in a new territory. You must connect the villages to each other using roads, with each village requiring a certain number of roads depending on its size.
+    return `**Objective:**  Your mission is to build a series of villages in a new territory. You must connect the settlements to each other using roads, with each settlement requiring a certain number of roads depending on its size.
 
 **How to Play:**
-• Click pieces from the sidebar to place them
-• Click two pieces to connect them
-• Click a connection to remove it
-• All pieces can connect with each other
-• Connections cannot cross
+• Drag settlements from the sidebar onto the map to place them
+• Click two settlements to connect them with a road
+• Click a road to remove it
+• All settlements can connect with each other
+• Roads cannot cross
+• Settlements cannot overlap each other or be placed on top of roads
+• Drag a settlement back to the sidebar to remove it
 
-**Win Condition:**  All pieces placed and fully connected.`;
+**Win Condition:**  All settlements placed and fully connected.`;
   }
 }

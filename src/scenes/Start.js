@@ -62,10 +62,17 @@ export class Start extends Phaser.Scene {
         logo.setDepth(1);
 
         // --- Play button ---
-        const playbutton = this.add.image(640, 450, 'play-button').setInteractive();
+        const playbutton = this.add.image(640, 450, 'play-button')
+            .setInteractive({ useHandCursor: true });
         playbutton.setScale(0.2);
         playbutton.setDepth(2);
 
+        playbutton.on('pointerover', () => {
+            playbutton.setScale(0.22);
+        });
+        playbutton.on('pointerout', () => {
+            playbutton.setScale(0.2);
+        });
         playbutton.on('pointerdown', () => {
             this.scene.start('Map');
         });

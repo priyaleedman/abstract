@@ -75,6 +75,31 @@ export class Level3 extends BaseLevel {
     return { xOffset: 55, yOffset: -20 }; // Lower than default
   }
 
+  getTerminology() {
+    return {
+      piece: 'atom',
+      pieces: 'atoms',
+      connection: 'bond',
+      connections: 'bonds',
+    };
+  }
+
+  /**
+   * Custom rejection message for invalid molecular bonds
+   */
+  getConnectionRejectionMessage(piece1, piece2) {
+    const names = {
+      'L3piece1': 'Hydrogen',
+      'L3piece2': 'Oxygen',
+      'L3piece3': 'Sulfur',
+      'L3piece4': 'Nitrogen',
+      'L3piece5': 'Carbon'
+    };
+    const name1 = names[piece1.pieceType] || 'This atom';
+    const name2 = names[piece2.pieceType] || 'this atom';
+    return `${name1} cannot bond with ${name2}.`;
+  }
+
   /**
    * Level 3 connection rule: elements can only bond according to molecular rules
    * Hydrogen: carbon, nitrogen
@@ -93,6 +118,15 @@ export class Level3 extends BaseLevel {
   getLevelInstructions() {
     return `**Objective:**  You are a researcher in a molecular biology lab tasked with building the N-terminus cysteine of a protein. You must correctly bond hydrogen, carbon, nitrogen, oxygen and sulfur atoms following the laws of chemistry.
 
+**How to Play:**
+• Drag atoms from the sidebar onto the workspace to place them
+• Click two atoms to create a bond between them
+• Click a bond to remove it
+• Each atom can only bond with specific other elements (see rules below)
+• Bonds cannot cross
+• Atoms cannot overlap each other or be placed on top of bonds
+• Drag an atom back to the sidebar to remove it
+
 **Bonding Rules:**
 • Hydrogen (H): bonds with carbon, nitrogen
 • Oxygen (O): bonds with carbon
@@ -100,6 +134,6 @@ export class Level3 extends BaseLevel {
 • Nitrogen (N): bonds with carbon, hydrogen
 • Carbon (C): bonds with everything
 
-**Win Condition:**  All pieces placed and fully connected following the bonding rules.`;
+**Win Condition:**  All atoms placed and fully connected following the bonding rules.`;
   }
 }

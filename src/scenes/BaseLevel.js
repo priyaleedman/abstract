@@ -65,6 +65,7 @@ export class BaseLevel extends Phaser.Scene {
     this.graphics = this.add.graphics().setDepth(0);
     this.clickThreshold = 10;
     this.input.dragDistanceThreshold = this.clickThreshold;
+    this._anyPieceDragging = false;
     this.isViewingSolved = false;
 
     // Check if we should skip instructions (from reset or data parameter)
@@ -143,6 +144,31 @@ export class BaseLevel extends Phaser.Scene {
   }
 
   /**
+   * Override this method in child classes to customize terminology
+   * @returns {Object} Mapping of generic terms to level-specific terms
+   */
+  getTerminology() {
+    return {
+      piece: 'piece',
+      pieces: 'pieces',
+      connection: 'connection',
+      connections: 'connections',
+    };
+  }
+
+  /**
+   * Override this method in child classes to provide a custom message
+   * when two pieces can't connect due to level-specific rules.
+   * @param {Phaser.GameObjects.Image} piece1 
+   * @param {Phaser.GameObjects.Image} piece2 
+   * @returns {string} Custom rejection message
+   */
+  getConnectionRejectionMessage(piece1, piece2) {
+    const t = this.getTerminology();
+    return `These ${t.pieces} cannot be connected.`;
+  }
+
+  /**
    * Override this method in child classes to define connection rules
    * @param {Phaser.GameObjects.Image} piece1 
    * @param {Phaser.GameObjects.Image} piece2 
@@ -166,9 +192,10 @@ export class BaseLevel extends Phaser.Scene {
       const y = topPadding + (spacing * i);
       const piece = this.add.image(sidebarX, y, type.key)
         .setScale(type.sidebarScale)
-        .setInteractive();
+        .setInteractive({ useHandCursor: true, draggable: true });
 
       this.sidebarPieces.push(piece); // Store reference
+      this.input.setDraggable(piece);
 
       // Counter text - moved to top right
       const countOffset = this.getCountLabelOffset();
@@ -193,16 +220,75 @@ export class BaseLevel extends Phaser.Scene {
         piece.setTint(0x888888);
       }
 
-      piece.on('pointerdown', () => {
-        if (type.count > 0) {
-          this.spawnPiece(type);
+      // Hover effect for sidebar pieces and counter
+      const baseSidebarScale = type.sidebarScale;
+      const counterBaseX = counterText.x;
+      const counterBaseY = counterText.y;
+      piece.on('pointerover', () => {
+        if (type.count > 0 && !piece._sidebarDragging) {
+          piece.setScale(baseSidebarScale * 1.15);
+          counterText.setPosition(counterBaseX + 5, counterBaseY - 5);
+        }
+      });
+      piece.on('pointerout', () => {
+        if (!piece._sidebarDragging) {
+          piece.setScale(baseSidebarScale);
+          counterText.setPosition(counterBaseX, counterBaseY);
+        }
+      });
+
+      // Track the ghost piece being dragged from sidebar
+      piece._sidebarDragging = false;
+      piece._ghostPiece = null;
+
+      piece.on('dragstart', (pointer) => {
+        if (type.count <= 0) return;
+        piece._sidebarDragging = true;
+
+        // Create a ghost piece that follows the pointer
+        const ghost = this.add.image(pointer.x, pointer.y, type.key)
+          .setScale(type.scale)
+          .setDepth(10)
+          .setAlpha(0.7);
+        piece._ghostPiece = ghost;
+      });
+
+      piece.on('drag', (pointer, dragX, dragY) => {
+        if (!piece._sidebarDragging || !piece._ghostPiece) return;
+        // Move the ghost, keep the sidebar piece in place
+        piece._ghostPiece.x = dragX;
+        piece._ghostPiece.y = dragY;
+        // Reset sidebar piece position so it doesn't move
+        piece.x = sidebarX;
+        piece.y = y;
+      });
+
+      piece.on('dragend', (pointer) => {
+        if (!piece._sidebarDragging) return;
+        piece._sidebarDragging = false;
+        piece.setScale(baseSidebarScale);
+
+        const ghost = piece._ghostPiece;
+        piece._ghostPiece = null;
+
+        if (!ghost) return;
+
+        const dropX = ghost.x;
+        const dropY = ghost.y;
+        ghost.destroy();
+
+        // Only place if dropped inside gameplay area
+        const inGameplay = dropX >= this.gameplayBounds.minX && dropX <= this.gameplayBounds.maxX &&
+                           dropY >= this.gameplayBounds.minY && dropY <= this.gameplayBounds.maxY;
+
+        if (inGameplay && type.count > 0) {
+          this.spawnPiece(type, dropX, dropY);
           type.count -= 1;
           counterText.setText(`x${type.count}`);
-          // Grey out piece if count reaches 0
           if (type.count === 0) {
             piece.setTint(0x888888);
           }
-          this.saveProgress(); // Save progress when piece is placed
+          this.saveProgress();
         }
       });
     });
@@ -217,7 +303,7 @@ export class BaseLevel extends Phaser.Scene {
 
     // Only make interactive if explicitly enabled AND not viewing solved
     if (enableInteraction && !this.isViewingSolved) {
-      piece.setInteractive({ draggable: true });
+      piece.setInteractive({ draggable: true, useHandCursor: true });
     }
 
     piece.edgeCount = type.edges;
@@ -234,6 +320,19 @@ export class BaseLevel extends Phaser.Scene {
     if (enableInteraction && !this.isViewingSolved) {
       this.input.setDraggable(piece);
 
+      // Hover effect for gameplay pieces (disabled while any piece is being dragged)
+      const baseScale = type.scale;
+      piece.on('pointerover', () => {
+        if (!this._anyPieceDragging) {
+          piece.setScale(baseScale * 1.12);
+        }
+      });
+      piece.on('pointerout', () => {
+        if (!piece._isDragging) {
+          piece.setScale(baseScale);
+        }
+      });
+
       piece.on('pointerdown', (pointer) => {
         piece._pointerDownPos = { x: pointer.x, y: pointer.y };
         piece._wasDragged = false;
@@ -247,6 +346,9 @@ export class BaseLevel extends Phaser.Scene {
 
       piece.on('dragstart', () => {
         piece._isDragging = true;
+        this._anyPieceDragging = true;
+        piece._dragStartX = piece.x;
+        piece._dragStartY = piece.y;
         piece.prevX = piece.x;
         piece.prevY = piece.y;
       });
@@ -280,10 +382,28 @@ export class BaseLevel extends Phaser.Scene {
 
       piece.on('dragend', () => {
         piece._isDragging = false;
+        this._anyPieceDragging = false;
+        piece.setScale(baseScale);
         
         // Check if piece was dropped in sidebar or navbar (removal areas)
         if (this.isPieceInRemovalArea(piece)) {
           this.removePiece(piece);
+        } else if (this.isOverlappingOtherPiece(piece)) {
+          const t = this.getTerminology();
+          piece.x = piece._dragStartX;
+          piece.y = piece._dragStartY;
+          piece.prevX = piece._dragStartX;
+          piece.prevY = piece._dragStartY;
+          this.redrawEdges();
+          this.showNotification(`${t.pieces.charAt(0).toUpperCase() + t.pieces.slice(1)} cannot overlap each other.`);
+        } else if (this.isOverlappingEdge(piece)) {
+          const t = this.getTerminology();
+          piece.x = piece._dragStartX;
+          piece.y = piece._dragStartY;
+          piece.prevX = piece._dragStartX;
+          piece.prevY = piece._dragStartY;
+          this.redrawEdges();
+          this.showNotification(`A ${t.piece} cannot be placed on top of a ${t.connection}.`);
         } else {
           this.checkSolved();
         }
@@ -408,14 +528,28 @@ export class BaseLevel extends Phaser.Scene {
 
     // Check level-specific connection rules
     if (!this.canConnectPieces(a, b)) {
+      this.showNotification(this.getConnectionRejectionMessage(a, b));
       a.clearTint();
       this._highlightedPiece = null;
       this.selectedPiece = null;
       return;
     }
 
-    // Prevent new connection if full or intersecting
-    if (a.connections.length >= a.edgeCount || b.connections.length >= b.edgeCount || this.edgeWouldIntersectPieces(a, b)) {
+    const t = this.getTerminology();
+
+    // Check if either piece is at max connections
+    if (a.connections.length >= a.edgeCount || b.connections.length >= b.edgeCount) {
+      const fullPiece = a.connections.length >= a.edgeCount ? a : b;
+      this.showNotification(`This ${t.piece} already has its maximum number of ${t.connections} (${fullPiece.edgeCount}).`);
+      a.clearTint();
+      this._highlightedPiece = null;
+      this.selectedPiece = null;
+      return;
+    }
+
+    // Check if connection would cross existing connections
+    if (this.edgeWouldIntersectPieces(a, b)) {
+      this.showNotification(`${t.connections.charAt(0).toUpperCase() + t.connections.slice(1)} cannot cross each other.`);
       a.clearTint();
       this._highlightedPiece = null;
       this.selectedPiece = null;
@@ -433,6 +567,94 @@ export class BaseLevel extends Phaser.Scene {
     this.redrawEdges();
     this.checkSolved();
     this.saveProgress(); // Save progress after adding edge
+  }
+
+  /**
+   * Show a temporary notification popup at the top of the gameplay area
+   */
+  showNotification(message) {
+    // Remove existing notification if present
+    if (this._notification) {
+      this._notification.bg.destroy();
+      this._notification.text.destroy();
+      if (this._notification.timer) {
+        this._notification.timer.remove();
+      }
+    }
+
+    const centerX = this.gameplayBounds 
+      ? (this.gameplayBounds.minX + this.gameplayBounds.maxX) / 2 
+      : 540;
+
+    const text = this.add.text(centerX, 92, message, {
+      fontSize: '18px',
+      color: '#000',
+      align: 'center',
+      wordWrap: { width: 500 }
+    }).setOrigin(0.5, 0.5).setDepth(50);
+
+    const padding = 16;
+    const bg = this.add.rectangle(
+      centerX, 92,
+      text.width + padding * 2,
+      text.height + padding,
+      0xf8d7da
+    ).setStrokeStyle(1, 0xf5c6cb).setDepth(49);
+
+    this._notification = { bg, text };
+
+    this._notification.timer = this.time.delayedCall(2500, () => {
+      bg.destroy();
+      text.destroy();
+      this._notification = null;
+    });
+  }
+
+  /**
+   * Check if a piece overlaps any other piece based on display size
+   */
+  isOverlappingOtherPiece(piece) {
+    const minDist = 30;
+    for (const other of this.pieces) {
+      if (other === piece) continue;
+      const dx = piece.x - other.x;
+      const dy = piece.y - other.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < minDist) return true;
+    }
+    return false;
+  }
+
+  /**
+   * Check if a piece overlaps any edge it's not connected to
+   */
+  isOverlappingEdge(piece) {
+    const threshold = 15;
+    for (const edge of this.edges) {
+      if (edge.p1 === piece || edge.p2 === piece) continue;
+      const dist = this.pointToSegmentDistance(
+        piece.x, piece.y,
+        edge.p1.x, edge.p1.y,
+        edge.p2.x, edge.p2.y
+      );
+      if (dist < threshold) return true;
+    }
+    return false;
+  }
+
+  /**
+   * Calculate the distance from a point to a line segment
+   */
+  pointToSegmentDistance(px, py, x1, y1, x2, y2) {
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    const lenSq = dx * dx + dy * dy;
+    if (lenSq === 0) return Math.sqrt((px - x1) ** 2 + (py - y1) ** 2);
+    let t = ((px - x1) * dx + (py - y1) * dy) / lenSq;
+    t = Math.max(0, Math.min(1, t));
+    const projX = x1 + t * dx;
+    const projY = y1 + t * dy;
+    return Math.sqrt((px - projX) ** 2 + (py - projY) ** 2);
   }
 
   edgeWouldIntersectPieces(p1, p2) {
@@ -526,7 +748,12 @@ export class BaseLevel extends Phaser.Scene {
     const solutionData = this.serializeSolution();
     ProgressManager.markLevelSolved(this.levelKey, solutionData);
 
+    // Disable all gameplay input while overlay is shown
+    this.input.enabled = false;
+
     const overlay = this.add.rectangle(640, 360, 1280, 720, 0xffffff, 0.95).setDepth(5);
+    // Re-enable input only for the overlay itself
+    overlay.setInteractive();
     
     // Center aligned text
     this.add.text(640, 280, 'Level Solved!', { 
@@ -537,30 +764,35 @@ export class BaseLevel extends Phaser.Scene {
       .setOrigin(0.5, 0.5)
       .setDepth(6);
 
+    // Re-enable input for buttons only
+    this.input.enabled = true;
+
     // View solved level button - center aligned
-    this.add.text(640, 360, 'View Solved Level', { 
+    const viewSolvedBtn = this.add.text(640, 360, 'View Solved Level', { 
       fontSize: '28px', 
       fill: '#007bff',
       align: 'center'
     })
       .setOrigin(0.5, 0.5)
-      .setInteractive()
-      .on('pointerdown', () => {
-        // Reload the scene to view the solved level
-        this.scene.restart();
-      })
+      .setInteractive({ useHandCursor: true })
+      .on('pointerdown', () => this.scene.restart())
       .setDepth(6);
+    this.addTextHover(viewSolvedBtn);
 
     // Return to map button - center aligned
-    this.add.text(640, 410, 'Return to Map', { 
+    const returnBtn = this.add.text(640, 410, 'Return to Map', { 
       fontSize: '28px', 
       fill: '#007bff',
       align: 'center'
     })
       .setOrigin(0.5, 0.5)
-      .setInteractive()
+      .setInteractive({ useHandCursor: true })
       .on('pointerdown', () => this.scene.start('Map'))
       .setDepth(6);
+    this.addTextHover(returnBtn);
+
+    // Block clicks from passing through to gameplay elements below
+    overlay.on('pointerdown', () => {});
   }
 
   /**
@@ -659,13 +891,14 @@ export class BaseLevel extends Phaser.Scene {
    * Add Back button in nav bar
    */
   addBackButton() {
-    this.add.text(30, this.navBarHeight / 2, 'Back', { 
+    const btn = this.add.text(30, this.navBarHeight / 2, 'Back', { 
       fontSize: '24px', 
       fill: '#007bff' 
     })
-      .setInteractive()
+      .setInteractive({ useHandCursor: true })
       .setOrigin(0, 0.5)
       .on('pointerdown', () => this.scene.start('Map'));
+    this.addTextHover(btn);
   }
 
   /**
@@ -673,15 +906,16 @@ export class BaseLevel extends Phaser.Scene {
    */
   addInfoButton() {
     const navBarCenterY = this.navBarHeight / 2;
-    this.add.text(860, navBarCenterY, 'Info', { 
+    const btn = this.add.text(860, navBarCenterY, 'Info', { 
       fontSize: '24px', 
       fill: '#007bff' 
     })
-      .setInteractive()
+      .setInteractive({ useHandCursor: true })
       .setOrigin(0.5, 0.5)
       .on('pointerdown', () => {
         this.showInstructions();
       });
+    this.addTextHover(btn);
   }
 
   /**
@@ -693,8 +927,9 @@ export class BaseLevel extends Phaser.Scene {
       fontSize: '24px', 
       fill: '#007bff' 
     })
-      .setInteractive()
+      .setInteractive({ useHandCursor: true })
       .setOrigin(0.5, 0.5);
+    this.addTextHover(resetButton);
     
     resetButton.on('pointerdown', () => {
       ProgressManager.clearInProgressLevel(this.levelKey);
@@ -704,24 +939,63 @@ export class BaseLevel extends Phaser.Scene {
   }
 
   /**
+   * Add hover effect to a text button (underline + slight scale)
+   */
+  addTextHover(textObj) {
+    const originalScale = textObj.scaleX;
+    textObj.on('pointerover', () => {
+      textObj.setScale(originalScale * 1.08);
+      textObj.setStyle({ fontStyle: 'bold' });
+    });
+    textObj.on('pointerout', () => {
+      textObj.setScale(originalScale);
+      textObj.setStyle({ fontStyle: 'normal' });
+    });
+  }
+
+  /**
    * Override this method in child classes to provide level-specific instructions
    * Use **text** to make text bold
    * @returns {string} Level instructions with optional **bold** markers
    */
   getLevelInstructions() {
-    return `Complete the puzzle by connecting all pieces.
+    const t = this.getTerminology();
+    return `Complete the puzzle by connecting all ${t.pieces}.
 
-**Objective:** Create a connected graph where each piece uses all of its available connections.`;
+**How to Play:**
+• Drag ${t.pieces} from the sidebar onto the play area to place them
+• Click two ${t.pieces} to create a ${t.connection} between them
+• Click a ${t.connection} to remove it
+• ${t.connections.charAt(0).toUpperCase() + t.connections.slice(1)} cannot cross
+• ${t.pieces.charAt(0).toUpperCase() + t.pieces.slice(1)} cannot overlap each other
+• Drag a ${t.piece} back to the sidebar to remove it
+
+**Objective:** Create a connected graph where each ${t.piece} uses all of its available ${t.connections}.`;
   }
 
   /**
-   * Show the instructions screen
+   * Show the instructions screen (scrollable if content is too long)
    */
   showInstructions() {
-    const overlay = this.add.rectangle(640, 360, 1280, 720, 0xffffff, 0.95).setDepth(100);
+    // Disable all gameplay input while instructions are shown
+    this.input.enabled = false;
+
+    const overlay = this.add.rectangle(640, 360, 1280, 720, 0xffffff, 0.95)
+      .setDepth(100)
+      .setInteractive(); // Block clicks reaching gameplay below
     
-    // Title - moved higher
-    this.add.text(640, 120, 'Level Instructions', { 
+    // Re-enable input for overlay buttons
+    this.input.enabled = true;
+
+    const titleY = 60;
+    const contentTopY = 100;
+    const maxContentHeight = 720 * 0.8; // 80% of viewport height
+    const buttonAreaHeight = 70;
+    const availableHeight = maxContentHeight - (contentTopY - titleY) - buttonAreaHeight;
+    const buttonY = titleY + maxContentHeight - 20;
+
+    // Title
+    this.add.text(640, titleY, 'Level Instructions', { 
       fontSize: '32px', 
       color: '#000',
       fontStyle: 'bold',
@@ -730,25 +1004,157 @@ export class BaseLevel extends Phaser.Scene {
       .setOrigin(0.5, 0.5)
       .setDepth(101);
 
-    // Instructions text with bold support - moved higher
+    // Render instructions into a container so we can measure and scroll
     const instructions = this.getLevelInstructions();
-    const finalY = this.renderInstructionsText(instructions, 640, 180, 101);
+    const contentContainer = this.add.container(0, 0).setDepth(101);
+    const contentHeight = this.renderInstructionsIntoContainer(instructions, 640, 0, contentContainer);
 
-    // Close button - positioned below all instructions
-    const closeButton = this.add.text(640, finalY + 40, 'Got it!', { 
+    const needsScroll = contentHeight > availableHeight;
+
+    if (needsScroll) {
+      // Create a mask to clip the scrollable area
+      const maskShape = this.make.graphics({ x: 0, y: 0 });
+      maskShape.fillStyle(0xffffff);
+      maskShape.fillRect(640 - 500, contentTopY, 1000, availableHeight);
+      const mask = maskShape.createGeometryMask();
+      contentContainer.setMask(mask);
+      contentContainer.y = contentTopY;
+
+      // Scroll state
+      let scrollY = 0;
+      const minScroll = -(contentHeight - availableHeight);
+      const maxScroll = 0;
+
+      // Scroll indicator
+      const scrollHint = this.add.text(640, contentTopY + availableHeight + 8, '↓ Scroll for more ↓', {
+        fontSize: '14px',
+        color: '#999999',
+        align: 'center'
+      }).setOrigin(0.5, 0).setDepth(101);
+      contentContainer._scrollHint = scrollHint;
+
+      // Mouse wheel scrolling
+      this.input.on('wheel', (pointer, gameObjects, deltaX, deltaY) => {
+        scrollY -= deltaY * 0.5;
+        scrollY = Phaser.Math.Clamp(scrollY, minScroll, maxScroll);
+        contentContainer.y = contentTopY + scrollY;
+
+        // Hide hint when at bottom, show when not
+        const atBottom = scrollY <= minScroll;
+        scrollHint.setVisible(!atBottom);
+      });
+
+      // Store references for cleanup
+      contentContainer._maskShape = maskShape;
+      contentContainer._scrollCleanup = () => {
+        this.input.off('wheel');
+        maskShape.destroy();
+      };
+    } else {
+      contentContainer.y = contentTopY;
+    }
+
+    // Close button - fixed at bottom
+    const closeButton = this.add.text(640, buttonY, 'Got it!', { 
       fontSize: '28px', 
       fill: '#007bff',
       align: 'center'
     })
       .setOrigin(0.5, 0.5)
-      .setInteractive()
+      .setInteractive({ useHandCursor: true })
       .setDepth(101);
+    this.addTextHover(closeButton);
 
     closeButton.on('pointerdown', () => {
+      // Clean up scroll listeners if any
+      if (contentContainer._scrollCleanup) {
+        contentContainer._scrollCleanup();
+      }
+      if (contentContainer._scrollHint) {
+        contentContainer._scrollHint.destroy();
+      }
       overlay.destroy();
-      // Destroy all instruction screen elements
+      contentContainer.destroy();
+      // Destroy all remaining instruction screen elements
       this.children.list.filter(obj => obj.depth === 101).forEach(obj => obj.destroy());
     });
+
+    // Block stray clicks
+    overlay.on('pointerdown', () => {});
+  }
+
+  /**
+   * Render instructions text into a container (for scrollable support)
+   * @returns {number} Total content height
+   */
+  renderInstructionsIntoContainer(text, x, startY, container) {
+    const lines = text.split('\n');
+    let currentY = startY;
+    const maxWidth = 900;
+    const baseLineSpacing = 8;
+
+    lines.forEach(line => {
+      if (line.trim() === '') {
+        currentY += 15;
+        return;
+      }
+
+      const segments = [];
+      let currentText = '';
+      let isBold = false;
+      let i = 0;
+
+      while (i < line.length) {
+        if (line[i] === '*' && line[i + 1] === '*') {
+          if (currentText) {
+            segments.push({ text: currentText, bold: isBold });
+            currentText = '';
+          }
+          isBold = !isBold;
+          i += 2;
+        } else {
+          currentText += line[i];
+          i++;
+        }
+      }
+      if (currentText) {
+        segments.push({ text: currentText, bold: isBold });
+      }
+
+      let currentX = x - maxWidth / 2;
+      let maxHeight = 0;
+      const lineObjects = [];
+
+      segments.forEach(segment => {
+        const style = {
+          fontSize: '20px',
+          color: '#000',
+          align: 'left',
+          wordWrap: { width: maxWidth, useAdvancedWrap: true }
+        };
+        if (segment.bold) {
+          style.fontStyle = 'bold';
+        }
+
+        const textObj = this.add.text(currentX, currentY, segment.text, style)
+          .setOrigin(0, 0);
+        container.add(textObj);
+
+        lineObjects.push(textObj);
+        currentX += textObj.width;
+        maxHeight = Math.max(maxHeight, textObj.height);
+      });
+
+      const totalWidth = lineObjects.reduce((sum, obj) => sum + obj.width, 0);
+      const offsetX = (maxWidth - totalWidth) / 2;
+      lineObjects.forEach(obj => {
+        obj.x += offsetX;
+      });
+
+      currentY += maxHeight + baseLineSpacing;
+    });
+
+    return currentY - startY;
   }
 
   /**
@@ -897,8 +1303,9 @@ export class BaseLevel extends Phaser.Scene {
       fontSize: '24px',
       fill: '#007bff'
     })
-      .setInteractive()
+      .setInteractive({ useHandCursor: true })
       .setOrigin(0.5, 0.5);
+    this.addTextHover(redoButton);
 
     redoButton.on('pointerdown', () => {
       ProgressManager.clearLevel(this.levelKey);

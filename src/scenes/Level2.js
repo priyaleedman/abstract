@@ -54,6 +54,15 @@ export class Level2 extends BaseLevel {
     return 64;
   }
 
+  getTerminology() {
+    return {
+      piece: 'stop',
+      pieces: 'stops',
+      connection: 'route',
+      connections: 'routes',
+    };
+  }
+
   /**
    * Level 2 connection rule: all pieces can connect with each other
    */
@@ -84,15 +93,17 @@ export class Level2 extends BaseLevel {
    * Level 2 instructions
    */
   getLevelInstructions() {
-    return `**Objective:**  You have been tasked with desiging Sydney's public transport network. You must connect light rail, bus, train and metro stops to each other. Each stop requires a certain number of connections and each type of stop must be connected to at least one other stop of the same type.
+    return `**Objective:**  You have been tasked with designing Sydney's public transport network. You must connect tram, bus, train and metro stops to each other. Each stop requires a certain number of routes and each type of stop must be connected to at least one other stop of the same type.
 
 **How to Play:**
-• Click pieces from the sidebar to place them
-• Click two pieces to connect them
-• Click a connection to remove it
-• All pieces can connect with each other
-• Connections cannot cross
+• Drag stops from the sidebar onto the map to place them
+• Click two stops to connect them with a route
+• Click a route to remove it
+• All stops can connect with each other
+• Routes cannot cross
+• Stops cannot overlap each other or be placed on top of routes
+• Drag a stop back to the sidebar to remove it
 
-**Win Condition:**  All pieces placed and fully connected. Each piece must have at least one same-type connection.`;
+**Win Condition:**  All stops placed and fully connected. Each stop must have at least one same-type connection.`;
   }
 }
