@@ -6,46 +6,121 @@ export class Map extends Phaser.Scene {
   }
 
   preload() {
-    // Load images for all levels
     this.load.image('village', 'assets/piece4.png');
     this.load.image('transport', 'assets/L2P2.PNG');
     this.load.image('chemistry', 'assets/molecule.PNG');
     this.load.image('green-tick', 'assets/green-tick.PNG');
     this.load.image('green-background', 'assets/green-background.png');
+    this.load.image('apple', 'assets/apple.png');
+    this.load.image('airport', 'assets/Airport.PNG');
+    this.load.image('alice-icon', 'assets/Alice.PNG');
   }
 
   create() {
-    // ============ TEMPORARY: Auto-mark levels as solved for testing ============
-    // TODO: REMOVE THIS BEFORE PRODUCTION!
-    // ProgressManager.markLevelSolved('Level1', { pieces: [], edges: [], pieceTypeCounts: [] });
-    //ProgressManager.markLevelSolved('Level2', { pieces: [], edges: [], pieceTypeCounts: [] });
-    //ProgressManager.markLevelSolved('Level3', { pieces: [], edges: [], pieceTypeCounts: [] });
-    // ===========================================================================
-
-    // White background
     this.cameras.main.setBackgroundColor('#ffffff');
 
-    const { centerX, centerY, width } = this.cameras.main;
+    const { width, height } = this.cameras.main;
+    const centerX = width / 2;
 
-    // Triangle positioning
-    const topY = centerY - 200;
-    const bottomY = centerY + 130;
-    const horizontalOffset = width * 0.25; // spread for left/right
-    const verticalLabelOffset = 140; // how far labels appear below images
+    // Determine which levels are unlocked: first 3 unsolved in order
+    const unlockOrder = [
+      'Airport', 'SocialNetwork', 'Town', 'Forest',
+      'Circuit', 'Settlements', 'PublicTransport', 'Molecule'
+    ];
+    const unlockedKeys = new Set();
+    let unsolvedCount = 0;
+    for (const key of unlockOrder) {
+      const status = ProgressManager.getLevelStatus(key);
+      if (status === 'solved') {
+        unlockedKeys.add(key);
+      } else if (unsolvedCount < 3) {
+        unlockedKeys.add(key);
+        unsolvedCount++;
+      }
+    }
 
-    // === Level 1 (Top - Village) ===
-    this.createLevelButton('Level1', centerX, topY, 'village', 0.18, verticalLabelOffset, 'Crossroads and cott-edge-s', 0.5, centerX - 10, topY + 50, 2.1);
+    // === Row 1 — Easy levels (top, y ≈ 130) ===
+    const row1Y = 130;
+    const row1Spacing = width / 4;
 
-    // === Level 2 (Bottom Left - Transport, shifted slightly right) ===
-    const level2X = centerX - horizontalOffset + 60; // small nudge right
-    this.createLevelButton('Level2', level2X, bottomY, 'transport', 0.1, verticalLabelOffset, 'Quicker to bi-cycle', 0.1, level2X + 40, bottomY + 60, 3.3);
+    this.createLevelButton({
+      levelKey: 'Airport', x: row1Spacing, y: row1Y,
+      imageKey: 'airport', imageScale: 0.08,
+      label: 'Clear for take-off!',
+      labelOffsetY: 85, locked: !unlockedKeys.has('Airport'),
+      bgScale: 2.5, bgOffsetX: 15, bgOffsetY: 25,
+      tickOffsetX: 100, tickOffsetY: -40
+    });
 
-    // === Level 3 (Bottom Right - Chemistry) ===
-    const level3X = centerX + horizontalOffset;
-    this.createLevelButton('Level3', level3X, bottomY, 'chemistry', 0.2, 135, 'Can\'t say no[de] to coffee', 0.5, level3X - 10, bottomY + 30, 1.8, level3X + 120, bottomY - 70);
+    this.createLevelButton({
+      levelKey: 'SocialNetwork', x: centerX, y: row1Y,
+      imageKey: 'alice-icon', imageScale: 0.38,
+      label: 'It\'s who you know',
+      labelOffsetY: 85, locked: !unlockedKeys.has('SocialNetwork'),
+      bgScale: 0.6, bgOffsetX: 15, bgOffsetY: 25,
+      tickOffsetX: 70, tickOffsetY: -40
+    });
+
+    this.createLevelButton({
+      levelKey: 'Town', x: width - row1Spacing, y: row1Y,
+      imageKey: 'apple', imageScale: 2.5,
+      label: 'These streets have\nedge-titude',
+      placeholder: true, locked: !unlockedKeys.has('Town')
+    });
+
+    // === Row 2 — Easy levels (middle, y ≈ 330) ===
+    const row2Y = 330;
+    const row2Offset = width / 3;
+
+    this.createLevelButton({
+      levelKey: 'Forest', x: row2Offset, y: row2Y,
+      imageKey: 'apple', imageScale: 2.5,
+      label: 'Leaf no node unturned',
+      placeholder: true, locked: !unlockedKeys.has('Forest')
+    });
+
+    this.createLevelButton({
+      levelKey: 'Circuit', x: width - row2Offset, y: row2Y,
+      imageKey: 'apple', imageScale: 2.5,
+      label: 'Ohm my graph!',
+      placeholder: true, locked: !unlockedKeys.has('Circuit')
+    });
+
+    // === Row 3 — Hard levels (bottom, y ≈ 555) ===
+    const row3Y = 555;
+    const row3Spacing = width / 4;
+
+    this.createLevelButton({
+      levelKey: 'Settlements', x: row3Spacing - 30, y: row3Y,
+      imageKey: 'village', imageScale: 0.10,
+      label: 'Crossroads and\ncott-edge-s',
+      labelOffsetY: 75, locked: !unlockedKeys.has('Settlements'),
+      bgScale: 2.1, bgOffsetX: -10, bgOffsetY: 30,
+      tickOffsetX: 70, tickOffsetY: -35
+    });
+
+    this.createLevelButton({
+      levelKey: 'PublicTransport', x: centerX, y: row3Y - 25,
+      imageKey: 'transport', imageScale: 0.05,
+      label: 'Quicker to bi-cycle',
+      labelOffsetY: 80, locked: !unlockedKeys.has('PublicTransport'),
+      bgScale: 3.0, bgOffsetX: 20, bgOffsetY: 35,
+      tickOffsetX: 60, tickOffsetY: -25
+    });
+
+    this.createLevelButton({
+      levelKey: 'Molecule', x: width - row3Spacing + 30, y: row3Y,
+      imageKey: 'chemistry', imageScale: 0.11,
+      label: "Can't say no[de]\nto coffee",
+      labelOffsetY: 70, locked: !unlockedKeys.has('Molecule'),
+      bgScale: 1.8, bgOffsetX: -10, bgOffsetY: 15,
+      tickOffsetX: 75, tickOffsetY: -40
+    });
 
     // === Back Button ===
-    const backButton = this.add.text(30, 30, 'Back', { fontSize: '24px', fill: '#007bff' })
+    const backButton = this.add.text(30, 30, 'Back', {
+      fontSize: '24px', fill: '#007bff'
+    })
       .setInteractive({ useHandCursor: true })
       .setOrigin(0, 0.5);
     backButton.on('pointerover', () => {
@@ -60,58 +135,98 @@ export class Map extends Phaser.Scene {
   }
 
   /**
-   * Create a level button with progress indicators
+   * Create a level button with progress indicators.
+   * @param {Object} opts
+   * @param {string} opts.levelKey - Scene key
+   * @param {number} opts.x - X position
+   * @param {number} opts.y - Y position
+   * @param {string} opts.imageKey - Preloaded image key
+   * @param {number} opts.imageScale - Display scale for the image
+   * @param {string} opts.label - Text shown beneath the image
+   * @param {boolean} [opts.placeholder] - If true, shows "Coming Soon" on click
+   * @param {boolean} [opts.locked] - If true, level is greyed out and non-interactive
+   * @param {number} [opts.bgScale] - Green background scale multiplier (relative to imageScale)
+   * @param {number} [opts.bgOffsetX] - Green background X offset from image center
+   * @param {number} [opts.bgOffsetY] - Green background Y offset from image center
+   * @param {number} [opts.labelOffsetY] - Y offset for label below image (default 55)
+   * @param {number} [opts.tickOffsetX] - Green tick X offset from image center
+   * @param {number} [opts.tickOffsetY] - Green tick Y offset from image center
    */
-  createLevelButton(levelKey, x, y, imageKey, imageScale, labelOffsetY, labelText, labelOriginX = 0.5, bgX = null, bgY = null, bgScaleMultiplier = 2.1, tickXOffset = null, tickYOffset = null) {
+  createLevelButton(opts) {
+    const {
+      levelKey, x, y, imageKey, imageScale, label,
+      placeholder = false, locked = false, labelOffsetY = 55,
+      bgScale = 2.1, bgOffsetX = 0, bgOffsetY = 0,
+      tickOffsetX = 80, tickOffsetY = -40
+    } = opts;
+
     const status = ProgressManager.getLevelStatus(levelKey);
-    
-    // If solved, show green background at 80% transparency
+
     if (status === 'solved') {
-      const greenBg = this.add.image(
-        bgX !== null ? bgX : x,
-        bgY !== null ? bgY : y,
-        'green-background'
-      )
-        .setScale(imageScale * bgScaleMultiplier)
-        .setAlpha(0.4);
-      greenBg.setDepth(-1);
+      this.add.image(x + bgOffsetX, y + bgOffsetY, 'green-background')
+        .setScale(imageScale * bgScale)
+        .setAlpha(0.4)
+        .setDepth(-1);
     }
 
-    // Level image
     const levelImage = this.add.image(x, y, imageKey)
-      .setInteractive({ useHandCursor: true })
       .setScale(imageScale);
 
-    // Level label
-    const label = this.add.text(x, y + labelOffsetY, labelText, { fontSize: '24px', color: '#000' })
-      .setOrigin(labelOriginX);
+    const labelText = this.add.text(x, y + labelOffsetY, label, {
+      fontSize: '16px', color: '#666666', align: 'center',
+      lineSpacing: 4
+    }).setOrigin(0.5, 0);
 
-    // Hover effect for level buttons
+    if (locked) {
+      levelImage.setTint(0x555555).setAlpha(0.98);
+      labelText.setVisible(false);
+      return;
+    }
+
+    levelImage.setInteractive({ useHandCursor: true });
+
     levelImage.on('pointerover', () => {
       levelImage.setScale(imageScale * 1.1);
-      label.setStyle({ fontStyle: 'bold' });
+      labelText.setStyle({ fontStyle: 'bold' });
     });
     levelImage.on('pointerout', () => {
       levelImage.setScale(imageScale);
-      label.setStyle({ fontStyle: 'normal' });
+      labelText.setStyle({ fontStyle: 'normal' });
     });
 
-    // If solved, show smaller green tick more right and up
     if (status === 'solved') {
-      const tickOffset = (imageScale * 100); // Approximate offset based on image scale
-      const defaultTickX = x + tickOffset + 130;
-      const defaultTickY = y - tickOffset - 50;
-      const tick = this.add.image(
-        tickXOffset !== null ? tickXOffset : defaultTickX, 
-        tickYOffset !== null ? tickYOffset : defaultTickY, 
-        'green-tick'
-      )
-        .setScale(0.04) // Smaller tick
-        .setOrigin(0.5);
-      tick.setDepth(10);
+      this.add.image(x + tickOffsetX, y + tickOffsetY, 'green-tick')
+        .setScale(0.04)
+        .setOrigin(0.5)
+        .setDepth(10);
     }
 
-    // Click handler
-    levelImage.on('pointerdown', () => this.scene.start(levelKey));
+    if (placeholder) {
+      levelImage.on('pointerdown', () => this.showComingSoon(x, y));
+    } else {
+      levelImage.on('pointerdown', () => this.scene.start(levelKey));
+    }
+  }
+
+  showComingSoon(x, y) {
+    if (this._comingSoon) {
+      this._comingSoon.bg.destroy();
+      this._comingSoon.text.destroy();
+      if (this._comingSoon.timer) this._comingSoon.timer.remove();
+    }
+
+    const text = this.add.text(x, y - 60, 'Coming Soon!', {
+      fontSize: '18px', color: '#555', fontStyle: 'bold', align: 'center'
+    }).setOrigin(0.5).setDepth(50);
+
+    const bg = this.add.rectangle(x, y - 60, text.width + 24, text.height + 12, 0xf0f0f0)
+      .setStrokeStyle(1, 0xcccccc).setDepth(49);
+
+    this._comingSoon = { bg, text };
+    this._comingSoon.timer = this.time.delayedCall(1500, () => {
+      bg.destroy();
+      text.destroy();
+      this._comingSoon = null;
+    });
   }
 }

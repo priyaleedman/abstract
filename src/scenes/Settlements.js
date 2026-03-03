@@ -1,11 +1,11 @@
 import { BaseLevel } from './BaseLevel.js';
 
 /**
- * Level1 - Basic puzzle where all pieces can connect with each other
+ * Settlements - Basic puzzle where all pieces can connect with each other
  */
-export class Level1 extends BaseLevel {
+export class Settlements extends BaseLevel {
   constructor() {
-    super('Level1');
+    super('Settlements');
   }
 
   preload() {
@@ -17,7 +17,7 @@ export class Level1 extends BaseLevel {
   }
 
   /**
-   * Define Level 1 specific pieces
+   * Define Settlements pieces
    */
   getPieceTypes() {
     return [
@@ -29,7 +29,7 @@ export class Level1 extends BaseLevel {
   }
 
   /**
-   * Level 1 piece labels - customize the sidebar labels
+   * Settlements piece labels
    */
   getPieceLabel(pieceKey, edges) {
     const labels = {
@@ -55,14 +55,14 @@ export class Level1 extends BaseLevel {
   }
 
   /**
-   * Level 1 connection rule: all pieces can connect with each other
+   * Settlements: all pieces can connect with each other
    */
   canConnectPieces(piece1, piece2) {
     return true;
   }
 
   /**
-   * Level 1 instructions
+   * Settlements instructions
    */
   getLevelInstructions() {
     return `**Objective:**  Your mission is to build a series of villages in a new territory. You must connect the settlements to each other using roads, with each settlement requiring a certain number of roads depending on its size.

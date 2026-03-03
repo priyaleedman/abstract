@@ -2,12 +2,12 @@ import { BaseLevel } from './BaseLevel.js';
 import { createCustomRules } from '../helpers/ConnectionRules.js';
 
 /**
- * Level3 - Molecular puzzle with element-specific bonding rules
+ * Molecule - Molecular puzzle with element-specific bonding rules
  * Build the N-terminus cysteine of a protein following chemical bonding rules
  */
-export class Level3 extends BaseLevel {
+export class Molecule extends BaseLevel {
   constructor() {
-    super('Level3');
+    super('Molecule');
     
     // Define molecular bonding rules
     this.bondingRules = createCustomRules({
@@ -29,7 +29,7 @@ export class Level3 extends BaseLevel {
   }
 
   /**
-   * Define Level 3 specific pieces representing molecular elements
+   * Define Molecule pieces representing molecular elements
    * L3P1: Hydrogen (1 edge, 17 pieces)
    * L3P2: Oxygen (1 edge, 7 pieces)
    * L3P3: Sulfur (2 edges, 1 piece)
@@ -48,7 +48,7 @@ export class Level3 extends BaseLevel {
   }
 
   /**
-   * Level 3 piece labels - customize the sidebar labels
+   * Molecule piece labels
    */
   getPieceLabel(pieceKey, edges) {
     const labels = {
@@ -62,7 +62,7 @@ export class Level3 extends BaseLevel {
   }
 
   /**
-   * Override label Y offset for Level 3 (pieces are smaller, so bring label closer)
+   * Override label Y offset (pieces are smaller, so bring label closer)
    */
   getBadgeOffset() {
     return { xOffset: 24, yOffset: -24 };
@@ -73,7 +73,7 @@ export class Level3 extends BaseLevel {
   }
 
   /**
-   * Override count label position for Level 3 (make it lower)
+   * Override count label position (make it lower)
    */
   getCountLabelOffset() {
     return { xOffset: 55, yOffset: -20 }; // Lower than default
@@ -105,7 +105,7 @@ export class Level3 extends BaseLevel {
   }
 
   /**
-   * Level 3 connection rule: elements can only bond according to molecular rules
+   * Molecule: elements can only bond according to molecular rules
    * Hydrogen: carbon, nitrogen
    * Oxygen: carbon
    * Sulfur: carbon
@@ -117,7 +117,7 @@ export class Level3 extends BaseLevel {
   }
 
   /**
-   * Level 3 instructions
+   * Molecule instructions
    */
   getLevelInstructions() {
     return `**Objective:**  You are a researcher in a molecular biology lab tasked with building the N-terminus cysteine of a protein. You must correctly bond hydrogen, carbon, nitrogen, oxygen and sulfur atoms following the laws of chemistry.

@@ -1,12 +1,14 @@
 import { Start } from './scenes/Start.js';
 import { Map } from './scenes/Map.js';
-import { Level1 } from './scenes/Level1.js';
-import { Level2 } from './scenes/Level2.js';
-import { Level3 } from './scenes/Level3.js';
+import { Airport } from './scenes/Airport.js';
+import { Settlements } from './scenes/Settlements.js';
+import { PublicTransport } from './scenes/PublicTransport.js';
+import { Molecule } from './scenes/Molecule.js';
+import { SocialNetwork } from './scenes/SocialNetwork.js';
 
 const config = {
   type: Phaser.AUTO,
-  title: 'Overlord Rising',
+  title: 'Abstract',
   description: '',
   parent: 'game-container',
   width: 1280,
@@ -16,9 +18,11 @@ const config = {
   scene: [
     Start,
     Map,
-    Level1,
-    Level2,
-    Level3
+    Airport,
+    SocialNetwork,
+    Settlements,
+    PublicTransport,
+    Molecule
   ],
   scale: {
     mode: Phaser.Scale.FIT,

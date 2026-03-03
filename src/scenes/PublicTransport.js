@@ -1,12 +1,12 @@
 import { BaseLevel } from './BaseLevel.js';
 
 /**
- * Level2 - Advanced puzzle with edges 2-5 and same-type connection requirement
+ * PublicTransport - Advanced puzzle with edges 2-5 and same-type connection requirement
  * Each piece must be connected to at least one other piece of the same type
  */
-export class Level2 extends BaseLevel {
+export class PublicTransport extends BaseLevel {
   constructor() {
-    super('Level2');
+    super('PublicTransport');
   }
 
   preload() {
@@ -18,7 +18,7 @@ export class Level2 extends BaseLevel {
   }
 
   /**
-   * Define Level 2 specific pieces with edges 2-5
+   * Define PublicTransport pieces with edges 2-5
    * Total edges: (2*4) + (3*4) + (4*6) + (5*4) = 8 + 12 + 24 + 20 = 64 (even) ✓
    */
   getPieceTypes() {
@@ -31,7 +31,7 @@ export class Level2 extends BaseLevel {
   }
 
   /**
-   * Level 2 piece labels - customize the sidebar labels
+   * PublicTransport piece labels
    */
   getPieceLabel(pieceKey, edges) {
     const labels = {
@@ -44,7 +44,7 @@ export class Level2 extends BaseLevel {
   }
 
   /**
-   * Override count label position for Level 2 (make it lower)
+   * Override count label position (make it lower)
    */
   getBadgeOffset() {
     return { xOffset: 30, yOffset: -28 };
@@ -68,14 +68,14 @@ export class Level2 extends BaseLevel {
   }
 
   /**
-   * Level 2 connection rule: all pieces can connect with each other
+   * PublicTransport: all pieces can connect with each other
    */
   canConnectPieces(piece1, piece2) {
     return true;
   }
 
   /**
-   * Level 2 additional win condition:
+   * PublicTransport additional win condition:
    * Each piece must be connected to at least one other piece of the same type
    */
   checkAdditionalSolvedConditions() {
@@ -94,7 +94,7 @@ export class Level2 extends BaseLevel {
   }
 
   /**
-   * Level 2 instructions
+   * PublicTransport instructions
    */
   getLevelInstructions() {
     return `**Objective:**  You have been tasked with designing Sydney's public transport network. You must connect tram, bus, train and metro stops to each other. Each stop requires a certain number of routes and each type of stop must be connected to at least one other stop of the same type.

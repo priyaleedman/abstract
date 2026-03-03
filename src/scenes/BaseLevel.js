@@ -152,6 +152,15 @@ export class BaseLevel extends Phaser.Scene {
   }
 
   /**
+   * Override this method in child classes to hide the "x N" piece count badge
+   * in the sidebar (useful when each piece type has only one instance).
+   * @returns {boolean} Whether to show the count label next to each sidebar piece
+   */
+  showSidebarCount() {
+    return true;
+  }
+
+  /**
    * Override this method in child classes to customize terminology
    * @returns {Object} Mapping of generic terms to level-specific terms
    */
@@ -205,17 +214,20 @@ export class BaseLevel extends Phaser.Scene {
       this.sidebarPieces.push(piece); // Store reference
       this.input.setDraggable(piece);
 
-      // Counter text - moved to top right
-      const countOffset = this.getCountLabelOffset();
-      const counterText = this.add.text(sidebarX + countOffset.xOffset, y + countOffset.yOffset, `x${type.count}`, {
-        fontSize: '16px',
-        color: '#000'
-      }).setOrigin(0.5, 0.5);
+      // Counter text - hidden when showSidebarCount() returns false
+      const countOffset = this.getCountLabelOffset(type);
+      let counterText = null;
+      if (this.showSidebarCount()) {
+        counterText = this.add.text(sidebarX + countOffset.xOffset, y + countOffset.yOffset, `x${type.count}`, {
+          fontSize: '16px',
+          color: '#000'
+        }).setOrigin(0.5, 0.5);
+      }
       this.sidebarCounters.push(counterText);
 
       // Label under piece with name and edge count
       const pieceLabel = this.getPieceLabel ? this.getPieceLabel(type.key, type.edges) : `Piece ${i + 1}: ${type.edges} edge${type.edges !== 1 ? 's' : ''}`;
-      const labelYOffset = this.getLabelYOffset();
+      const labelYOffset = this.getLabelYOffset(type);
       const labelXOffset = this.getLabelXOffset();
       this.add.text(sidebarX + labelXOffset, y + labelYOffset, pieceLabel, {
         fontSize: '14px',
@@ -230,18 +242,18 @@ export class BaseLevel extends Phaser.Scene {
 
       // Hover effect for sidebar pieces and counter
       const baseSidebarScale = type.sidebarScale;
-      const counterBaseX = counterText.x;
-      const counterBaseY = counterText.y;
+      const counterBaseX = counterText ? counterText.x : 0;
+      const counterBaseY = counterText ? counterText.y : 0;
       piece.on('pointerover', () => {
         if (type.count > 0 && !piece._sidebarDragging) {
           piece.setScale(baseSidebarScale * 1.15);
-          counterText.setPosition(counterBaseX + 5, counterBaseY - 5);
+          if (counterText) counterText.setPosition(counterBaseX + 5, counterBaseY - 5);
         }
       });
       piece.on('pointerout', () => {
         if (!piece._sidebarDragging) {
           piece.setScale(baseSidebarScale);
-          counterText.setPosition(counterBaseX, counterBaseY);
+          if (counterText) counterText.setPosition(counterBaseX, counterBaseY);
         }
       });
 
@@ -294,7 +306,7 @@ export class BaseLevel extends Phaser.Scene {
         if (inGameplay && type.count > 0) {
           this.spawnPiece(type, dropX, dropY);
           type.count -= 1;
-          counterText.setText(`x${type.count}`);
+          if (counterText) counterText.setText(`x${type.count}`);
           if (type.count === 0) {
             piece.setTint(0x888888);
           }
@@ -447,7 +459,7 @@ export class BaseLevel extends Phaser.Scene {
 
   createBadge(piece) {
     const remaining = piece.edgeCount - piece.connections.length;
-    const { xOffset, yOffset } = this.getBadgeOffset();
+    const { xOffset, yOffset } = this.getBadgeOffset(piece);
     const radius = 12;
 
     const bg = this.add.circle(piece.x + xOffset, piece.y + yOffset, radius, 0xaaaaaa, 0.85)
@@ -469,7 +481,7 @@ export class BaseLevel extends Phaser.Scene {
   updateBadge(piece) {
     if (!piece._badge) return;
     const remaining = piece.edgeCount - piece.connections.length;
-    const { xOffset, yOffset } = this.getBadgeOffset();
+    const { xOffset, yOffset } = this.getBadgeOffset(piece);
 
     piece._badge.setPosition(piece.x + xOffset, piece.y + yOffset);
     piece._badgeText.setPosition(piece.x + xOffset, piece.y + yOffset);
@@ -1212,7 +1224,11 @@ export class BaseLevel extends Phaser.Scene {
           style.fontStyle = 'bold';
         }
 
-        const textObj = this.add.text(currentX, currentY, segment.text, style)
+        let displayText = segment.text;
+        if (displayText.endsWith(' ')) displayText = displayText.slice(0, -1) + '\u00A0';
+        if (displayText.startsWith(' ')) displayText = '\u00A0' + displayText.slice(1);
+
+        const textObj = this.add.text(currentX, currentY, displayText, style)
           .setOrigin(0, 0);
         container.add(textObj);
 
@@ -1294,7 +1310,11 @@ export class BaseLevel extends Phaser.Scene {
           style.fontStyle = 'bold';
         }
 
-        const textObj = this.add.text(currentX, currentY, segment.text, style)
+        let displayText = segment.text;
+        if (displayText.endsWith(' ')) displayText = displayText.slice(0, -1) + '\u00A0';
+        if (displayText.startsWith(' ')) displayText = '\u00A0' + displayText.slice(1);
+
+        const textObj = this.add.text(currentX, currentY, displayText, style)
           .setOrigin(0, 0)
           .setDepth(depth);
 
