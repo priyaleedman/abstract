@@ -14,6 +14,7 @@ export class Map extends Phaser.Scene {
     this.load.image('apple', 'assets/apple.png');
     this.load.image('airport', 'assets/Airport.PNG');
     this.load.image('alice-icon', 'assets/Alice.PNG');
+    this.load.image('powertower', 'assets/PowerTower.PNG');
   }
 
   create() {
@@ -24,7 +25,7 @@ export class Map extends Phaser.Scene {
 
     // Determine which levels are unlocked: first 3 unsolved in order
     const unlockOrder = [
-      'Airport', 'SocialNetwork', 'Town', 'Forest',
+      'Airport', 'SocialNetwork', 'PowerGrid', 'Forest',
       'Circuit', 'Settlements', 'PublicTransport', 'Molecule'
     ];
     const unlockedKeys = new Set();
@@ -62,10 +63,11 @@ export class Map extends Phaser.Scene {
     });
 
     this.createLevelButton({
-      levelKey: 'Town', x: width - row1Spacing, y: row1Y,
-      imageKey: 'apple', imageScale: 2.5,
-      label: 'These streets have\nedge-titude',
-      placeholder: true, locked: !unlockedKeys.has('Town')
+      levelKey: 'PowerGrid', x: width - row1Spacing, y: row1Y,
+      imageKey: 'powertower', imageScale: 0.07,
+      label: 'Watt a connection!', labelOffsetY: 80,
+      bgScale: 3, bgOffsetY: 30,
+      locked: !unlockedKeys.has('PowerGrid')
     });
 
     // === Row 2 — Easy levels (middle, y ≈ 330) ===

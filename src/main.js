@@ -5,6 +5,7 @@ import { Settlements } from './scenes/Settlements.js';
 import { PublicTransport } from './scenes/PublicTransport.js';
 import { Molecule } from './scenes/Molecule.js';
 import { SocialNetwork } from './scenes/SocialNetwork.js';
+import { PowerGrid } from './scenes/PowerGrid.js';
 
 const config = {
   type: Phaser.AUTO,
@@ -20,6 +21,7 @@ const config = {
     Map,
     Airport,
     SocialNetwork,
+    PowerGrid,
     Settlements,
     PublicTransport,
     Molecule
