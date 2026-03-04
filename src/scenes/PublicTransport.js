@@ -23,10 +23,10 @@ export class PublicTransport extends BaseLevel {
    */
   getPieceTypes() {
     return [
-      { key: 'L2piece1', edges: 2, count: 4, scale: 0.08, sidebarScale: 0.1 },
-      { key: 'L2piece2', edges: 3, count: 4, scale: 0.04, sidebarScale: 0.04 },
-      { key: 'L2piece3', edges: 4, count: 6, scale: 0.08, sidebarScale: 0.07 },
-      { key: 'L2piece4', edges: 5, count: 4, scale: 0.12, sidebarScale: 0.11 },
+      { key: 'L2piece1', edges: 2, count: 4, scale: 0.07, sidebarScale: 0.1 },
+      { key: 'L2piece2', edges: 3, count: 4, scale: 0.035, sidebarScale: 0.04 },
+      { key: 'L2piece3', edges: 4, count: 6, scale: 0.06, sidebarScale: 0.07 },
+      { key: 'L2piece4', edges: 5, count: 4, scale: 0.1, sidebarScale: 0.11 },
     ];
   }
 
@@ -47,7 +47,7 @@ export class PublicTransport extends BaseLevel {
    * Override count label position (make it lower)
    */
   getBadgeOffset() {
-    return { xOffset: 30, yOffset: -28 };
+    return { xOffset: 60, yOffset: -25 };
   }
 
   getCountLabelOffset() {

@@ -15,6 +15,8 @@ export class Map extends Phaser.Scene {
     this.load.image('airport', 'assets/Airport.PNG');
     this.load.image('alice-icon', 'assets/Alice.PNG');
     this.load.image('powertower', 'assets/PowerTower.PNG');
+    this.load.image('snail-icon', 'assets/Snail.PNG');
+    this.load.image('city-icon', 'assets/City.PNG');
   }
 
   create() {
@@ -26,7 +28,7 @@ export class Map extends Phaser.Scene {
     // Determine which levels are unlocked: first 3 unsolved in order
     const unlockOrder = [
       'Airport', 'SocialNetwork', 'PowerGrid', 'Forest',
-      'Circuit', 'Settlements', 'PublicTransport', 'Molecule'
+      'Cities', 'Settlements', 'PublicTransport', 'Molecule'
     ];
     const unlockedKeys = new Set();
     let unsolvedCount = 0;
@@ -49,8 +51,8 @@ export class Map extends Phaser.Scene {
       imageKey: 'airport', imageScale: 0.08,
       label: 'Clear for take-off!',
       labelOffsetY: 85, locked: !unlockedKeys.has('Airport'),
-      bgScale: 2.5, bgOffsetX: 15, bgOffsetY: 25,
-      tickOffsetX: 100, tickOffsetY: -40
+      bgScale: 2.8, bgOffsetX: 15, bgOffsetY: 25,
+      tickOffsetX: 110, tickOffsetY: -40
     });
 
     this.createLevelButton({
@@ -58,7 +60,7 @@ export class Map extends Phaser.Scene {
       imageKey: 'alice-icon', imageScale: 0.38,
       label: 'It\'s who you know',
       labelOffsetY: 85, locked: !unlockedKeys.has('SocialNetwork'),
-      bgScale: 0.6, bgOffsetX: 15, bgOffsetY: 25,
+      bgScale: 0.6, bgOffsetX: 10, bgOffsetY: 25,
       tickOffsetX: 70, tickOffsetY: -40
     });
 
@@ -66,7 +68,7 @@ export class Map extends Phaser.Scene {
       levelKey: 'PowerGrid', x: width - row1Spacing, y: row1Y,
       imageKey: 'powertower', imageScale: 0.07,
       label: 'Watt a connection!', labelOffsetY: 80,
-      bgScale: 3, bgOffsetY: 30,
+      bgScale: 3, bgOffsetY: 30, tickOffsetX: 60,
       locked: !unlockedKeys.has('PowerGrid')
     });
 
@@ -76,16 +78,20 @@ export class Map extends Phaser.Scene {
 
     this.createLevelButton({
       levelKey: 'Forest', x: row2Offset, y: row2Y,
-      imageKey: 'apple', imageScale: 2.5,
+      imageKey: 'snail-icon', imageScale: 8,
       label: 'Leaf no node unturned',
-      placeholder: true, locked: !unlockedKeys.has('Forest')
+      labelOffsetY: 75, locked: !unlockedKeys.has('Forest'),
+      bgScale: 0.028, bgOffsetY: 20,
+      tickOffsetX: 70, tickOffsetY: -40
     });
 
     this.createLevelButton({
-      levelKey: 'Circuit', x: width - row2Offset, y: row2Y,
-      imageKey: 'apple', imageScale: 2.5,
-      label: 'Ohm my graph!',
-      placeholder: true, locked: !unlockedKeys.has('Circuit')
+      levelKey: 'Cities', x: width - row2Offset, y: row2Y,
+      imageKey: 'city-icon', imageScale: 0.16,
+      label: 'Highway to the\ngraph zone',
+      labelOffsetY: 75, locked: !unlockedKeys.has('Cities'),
+      bgScale: 1.4, bgOffsetY: 50,
+      tickOffsetX: 65, tickOffsetY: -25
     });
 
     // === Row 3 — Hard levels (bottom, y ≈ 555) ===
@@ -97,8 +103,8 @@ export class Map extends Phaser.Scene {
       imageKey: 'village', imageScale: 0.10,
       label: 'Crossroads and\ncott-edge-s',
       labelOffsetY: 75, locked: !unlockedKeys.has('Settlements'),
-      bgScale: 2.1, bgOffsetX: -10, bgOffsetY: 30,
-      tickOffsetX: 70, tickOffsetY: -35
+      bgScale: 2.4, bgOffsetX: -5, bgOffsetY: 20,
+      tickOffsetX: 90, tickOffsetY: -50
     });
 
     this.createLevelButton({
@@ -106,8 +112,8 @@ export class Map extends Phaser.Scene {
       imageKey: 'transport', imageScale: 0.05,
       label: 'Quicker to bi-cycle',
       labelOffsetY: 80, locked: !unlockedKeys.has('PublicTransport'),
-      bgScale: 3.0, bgOffsetX: 20, bgOffsetY: 35,
-      tickOffsetX: 60, tickOffsetY: -25
+      bgScale: 4.2, bgOffsetX: 20, bgOffsetY: 35,
+      tickOffsetX: 90, tickOffsetY: -32
     });
 
     this.createLevelButton({
@@ -115,8 +121,8 @@ export class Map extends Phaser.Scene {
       imageKey: 'chemistry', imageScale: 0.11,
       label: "Can't say no[de]\nto coffee",
       labelOffsetY: 70, locked: !unlockedKeys.has('Molecule'),
-      bgScale: 1.8, bgOffsetX: -10, bgOffsetY: 15,
-      tickOffsetX: 75, tickOffsetY: -40
+      bgScale: 2, bgOffsetX: -10, bgOffsetY: 15,
+      tickOffsetX: 70, tickOffsetY: -40
     });
 
     // === Back Button ===

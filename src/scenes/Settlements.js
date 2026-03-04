@@ -42,7 +42,7 @@ export class Settlements extends BaseLevel {
   }
 
   getBadgeOffset() {
-    return { xOffset: 48, yOffset: -25 };
+    return { xOffset: 50, yOffset: -30 };
   }
 
   getTerminology() {

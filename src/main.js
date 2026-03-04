@@ -6,6 +6,8 @@ import { PublicTransport } from './scenes/PublicTransport.js';
 import { Molecule } from './scenes/Molecule.js';
 import { SocialNetwork } from './scenes/SocialNetwork.js';
 import { PowerGrid } from './scenes/PowerGrid.js';
+import { Forest } from './scenes/Forest.js';
+import { Cities } from './scenes/Cities.js';
 
 const config = {
   type: Phaser.AUTO,
@@ -22,6 +24,8 @@ const config = {
     Airport,
     SocialNetwork,
     PowerGrid,
+    Forest,
+    Cities,
     Settlements,
     PublicTransport,
     Molecule

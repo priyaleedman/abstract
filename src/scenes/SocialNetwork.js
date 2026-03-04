@@ -10,7 +10,7 @@ export class SocialNetwork extends BaseLevel {
     this.load.image('alice', 'assets/Alice.PNG');
     this.load.image('bob', 'assets/Bob.PNG');
     this.load.image('carol', 'assets/Carol.PNG');
-    this.load.image('dani', 'assets/Dani.PNG');
+    this.load.image('david', 'assets/David.PNG');
     this.load.image('ed', 'assets/Ed.PNG');
   }
 
@@ -19,7 +19,7 @@ export class SocialNetwork extends BaseLevel {
       { key: 'alice', edges: 2, count: 1, scale: 0.3, sidebarScale: 0.22 },
       { key: 'bob',   edges: 3, count: 1, scale: 0.3, sidebarScale: 0.22 },
       { key: 'carol', edges: 2, count: 1, scale: 0.3, sidebarScale: 0.22 },
-      { key: 'dani',  edges: 1, count: 1, scale: 0.3, sidebarScale: 0.22 },
+      { key: 'david',  edges: 1, count: 1, scale: 0.3, sidebarScale: 0.22 },
       { key: 'ed',    edges: 2, count: 1, scale: 0.3, sidebarScale: 0.22 },
     ];
   }
@@ -29,7 +29,7 @@ export class SocialNetwork extends BaseLevel {
       'alice': 'Alice',
       'bob': 'Bob',
       'carol': 'Carol',
-      'dani': 'Dani',
+      'david': 'David',
       'ed': 'Ed'
     };
     const name = names[pieceKey] || pieceKey;
@@ -69,7 +69,7 @@ export class SocialNetwork extends BaseLevel {
     return `Welcome to the Social Network!
 
 **Scenario:**
-Five friends — Alice, Bob, Carol, Dani, and Ed — are in a social group. Each person has a certain number of friends.
+Five friends — Alice, Bob, Carol, David, and Ed — are in a social group. Each person has a certain number of friends.
 
 **Your task:**
 Reconstruct their social network by placing each person on the board and connecting friends together.
@@ -78,7 +78,7 @@ Reconstruct their social network by placing each person on the board and connect
 • Alice has 2 friends
 • Bob has 3 friends
 • Carol has 2 friends
-• Dani has 1 friend
+• David has 1 friend
 • Ed has 2 friends
 
 **How to play:**

@@ -186,6 +186,14 @@ export class BaseLevel extends Phaser.Scene {
   }
 
   /**
+   * Override this method in child classes to allow edges to cross
+   * @returns {boolean} Whether edges are allowed to cross each other
+   */
+  allowEdgeCrossing() {
+    return false;
+  }
+
+  /**
    * Override this method in child classes to define connection rules
    * @param {Phaser.GameObjects.Image} piece1 
    * @param {Phaser.GameObjects.Image} piece2 
@@ -383,17 +391,16 @@ export class BaseLevel extends Phaser.Scene {
       piece.on('drag', (pointer, dragX, dragY) => {
         piece._wasDragged = true;
         
-        // Allow dragging anywhere (including sidebar and navbar for removal)
-        // but constrain to gameplay bounds if not in removal areas
         const inSidebar = dragX >= this.sidebarBounds.minX;
-        const inNavBar = dragY <= this.navBarBounds.maxY && dragX <= this.navBarBounds.maxX;
         
-        if (!inSidebar && !inNavBar) {
-          // Constrain to gameplay bounds
+        // Always prevent entering the nav bar
+        dragY = Math.max(this.gameplayBounds.minY, dragY);
+        
+        if (!inSidebar) {
           dragX = Math.max(this.gameplayBounds.minX, Math.min(dragX, this.gameplayBounds.maxX));
-          dragY = Math.max(this.gameplayBounds.minY, Math.min(dragY, this.gameplayBounds.maxY));
+          dragY = Math.min(dragY, this.gameplayBounds.maxY);
           
-          if (this.wouldCauseIntersection(piece, dragX, dragY)) {
+          if (!this.allowEdgeCrossing() && this.wouldCauseIntersection(piece, dragX, dragY)) {
             piece.x = piece.prevX;
             piece.y = piece.prevY;
             return;
@@ -418,7 +425,7 @@ export class BaseLevel extends Phaser.Scene {
           piece._badgeText.setDepth(3);
         }
         
-        // Check if piece was dropped in sidebar or navbar (removal areas)
+        // Check if piece was dropped in the sidebar (removal area)
         if (this.isPieceInRemovalArea(piece)) {
           this.removePiece(piece);
         } else if (this.isOverlappingOtherPiece(piece)) {
@@ -497,20 +504,13 @@ export class BaseLevel extends Phaser.Scene {
   }
 
   /**
-   * Check if a piece is in a removal area (sidebar or navbar)
+   * Check if a piece is in a removal area (sidebar only)
    */
   isPieceInRemovalArea(piece) {
-    const inSidebar = piece.x >= this.sidebarBounds.minX &&
-                      piece.x <= this.sidebarBounds.maxX &&
-                      piece.y >= this.sidebarBounds.minY &&
-                      piece.y <= this.sidebarBounds.maxY;
-    
-    const inNavBar = piece.x >= this.navBarBounds.minX &&
-                     piece.x <= this.navBarBounds.maxX &&
-                     piece.y >= this.navBarBounds.minY &&
-                     piece.y <= this.navBarBounds.maxY;
-    
-    return inSidebar || inNavBar;
+    return piece.x >= this.sidebarBounds.minX &&
+           piece.x <= this.sidebarBounds.maxX &&
+           piece.y >= this.sidebarBounds.minY &&
+           piece.y <= this.sidebarBounds.maxY;
   }
 
   /**
@@ -633,7 +633,7 @@ export class BaseLevel extends Phaser.Scene {
     }
 
     // Check if connection would cross existing connections
-    if (this.edgeWouldIntersectPieces(a, b)) {
+    if (!this.allowEdgeCrossing() && this.edgeWouldIntersectPieces(a, b)) {
       this.showNotification(`${t.connections.charAt(0).toUpperCase() + t.connections.slice(1)} cannot cross each other.`);
       a.clearTint();
       this._highlightedPiece = null;
