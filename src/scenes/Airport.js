@@ -109,19 +109,4 @@ export class Airport extends BaseLevel {
     return true;
   }
 
-  // --- Tutorial hint system ---
-
-  showInstructions() {
-    if (!this._tutorialStarted) {
-      this._tutorialStarted = true;
-      this.showTutorialHint('Drag an airport from the sidebar onto the map to get started!');
-      return;
-    }
-    super.showInstructions();
-  }
-
-  saveProgress() {
-    super.saveProgress();
-  }
-
 }
