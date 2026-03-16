@@ -120,6 +120,13 @@ export class BaseLevel extends Phaser.Scene {
   }
 
   /**
+   * Override to return a display name for a piece (e.g. "Alice" instead of "this person")
+   */
+  getPieceName(pieceKey) {
+    return null;
+  }
+
+  /**
    * Override this method in child classes to customize label positioning
    * @returns {number} Y offset for the label below the piece
    */
@@ -687,7 +694,10 @@ export class BaseLevel extends Phaser.Scene {
     // Check if either piece is at max connections
     if (a.connections.length >= a.edgeCount || b.connections.length >= b.edgeCount) {
       const fullPiece = a.connections.length >= a.edgeCount ? a : b;
-      this.showNotification(`This ${t.piece} already has its maximum number of ${t.connections} (${fullPiece.edgeCount}).`);
+      const pieceName = this.getPieceName(fullPiece.pieceType);
+      const pieceDesc = pieceName || `This ${t.piece}`;
+      const pronoun = pieceName ? 'their' : 'its';
+      this.showNotification(`${pieceDesc} already has ${pronoun} maximum number of ${t.connections} (${fullPiece.edgeCount}).`);
       a.clearTint();
       this._highlightedPiece = null;
       this.selectedPiece = null;

@@ -36,6 +36,11 @@ export class SocialNetwork extends BaseLevel {
     return `${name}: ${edges} friend${edges !== 1 ? 's' : ''}`;
   }
 
+  getPieceName(pieceKey) {
+    const names = { alice: 'Alice', bob: 'Bob', carol: 'Carol', david: 'David', ed: 'Ed' };
+    return names[pieceKey] || pieceKey;
+  }
+
   getBadgeOffset(piece) {
     return { xOffset: 45, yOffset: -60 };
   }
@@ -65,9 +70,13 @@ export class SocialNetwork extends BaseLevel {
     return true;
   }
 
+  allowEdgeCrossing() {
+    return true;
+  }
+
   getLevelInstructions() {
     return `**Scenario:**
-Five friends — Alice, Bob, Carol, David, and Ed — are in a social group. Each person has a certain number of close friendships.
+You have just moved to a new town and are trying to figure out who is friends with whom. Five people — Alice, Bob, Carol, David, and Ed — are in a social group, and each person has a certain number of close friendships. Can you piece together the social network?
 
 **Friendships:**
 • Alice — 2 friends
@@ -80,7 +89,6 @@ Five friends — Alice, Bob, Carol, David, and Ed — are in a social group. Eac
 • Drag people from the sidebar onto the play area
 • Click two people to create a friendship between them
 • Click two connected people again to remove the friendship
-• Friendships cannot cross — people talk behind each other's backs enough already!
 • Drag a person back to the sidebar to remove them
 
 **Objective:**

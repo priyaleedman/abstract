@@ -26,16 +26,18 @@ export class Map extends Phaser.Scene {
     const { width, height } = this.cameras.main;
     const centerX = width / 2;
 
-    // Determine which levels are unlocked: first 3 unsolved in order
+    // Determine which levels are unlocked:
+    // - solved and previously_solved levels are always available
+    // - first 3 unsolved levels (in order) are unlocked
     const unlockOrder = [
-      'Airport', 'SocialNetwork', 'PowerGrid', 'Forest',
+      'SocialNetwork', 'Airport', 'PowerGrid', 'Forest',
       'Cities', 'Settlements', 'PublicTransport', 'Molecule'
     ];
     const unlockedKeys = new Set();
     let unsolvedCount = 0;
     for (const key of unlockOrder) {
       const status = ProgressManager.getLevelStatus(key);
-      if (status === 'solved') {
+      if (status === 'solved' || status === 'previously_solved') {
         unlockedKeys.add(key);
       } else if (unsolvedCount < 3) {
         unlockedKeys.add(key);
@@ -48,21 +50,21 @@ export class Map extends Phaser.Scene {
     const row1Spacing = width / 4;
 
     this.createLevelButton({
-      levelKey: 'Airport', x: row1Spacing, y: row1Y+ 15,
-      imageKey: 'airport', imageScale: 0.09,
-      label: 'Air-planar',
-      labelOffsetY: 70, locked: !unlockedKeys.has('Airport'),
-      bgScale: 2.8, bgOffsetX: 15, bgOffsetY: 20,
-      tickOffsetX: 100, tickOffsetY: -40
-    });
-
-    this.createLevelButton({
-      levelKey: 'SocialNetwork', x: centerX, y: row1Y,
+      levelKey: 'SocialNetwork', x: row1Spacing, y: row1Y,
       imageKey: 'alice-icon', imageScale: 0.38,
       label: 'Degrees of connection',
       labelOffsetY: 85, locked: !unlockedKeys.has('SocialNetwork'),
       bgScale: 0.6, bgOffsetX: 10, bgOffsetY: 25,
       tickOffsetX: 70, tickOffsetY: -40
+    });
+
+    this.createLevelButton({
+      levelKey: 'Airport', x: centerX, y: row1Y + 15,
+      imageKey: 'airport', imageScale: 0.09,
+      label: 'Air-planar',
+      labelOffsetY: 70, locked: !unlockedKeys.has('Airport'),
+      bgScale: 2.8, bgOffsetX: 15, bgOffsetY: 20,
+      tickOffsetX: 100, tickOffsetY: -40
     });
 
     this.createLevelButton({

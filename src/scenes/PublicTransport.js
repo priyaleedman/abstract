@@ -1,8 +1,8 @@
 import { BaseLevel } from './BaseLevel.js';
 
 /**
- * PublicTransport - Advanced puzzle with edges 2-5 and same-type connection requirement
- * Each piece must be connected to at least one other piece of the same type
+ * PublicTransport - Puzzle where footpaths connect different types of transit stops.
+ * No two stops of the same type may be directly connected (proper 4-colouring).
  */
 export class PublicTransport extends BaseLevel {
   constructor() {
@@ -19,13 +19,13 @@ export class PublicTransport extends BaseLevel {
 
   /**
    * Define PublicTransport pieces with edges 2-5
-   * Total edges: (2*3) + (3*3) + (4*5) + (5*3) = 6 + 9 + 20 + 15 = 50 (even) ✓
+   * Total edges: (2*3) + (3*3) + (4*4) + (5*3) = 6 + 9 + 16 + 15 = 46 (even) ✓
    */
   getPieceTypes() {
     return [
       { key: 'L2piece1', edges: 2, count: 3, scale: 0.09, sidebarScale: 0.1 },
       { key: 'L2piece2', edges: 3, count: 3, scale: 0.037, sidebarScale: 0.04 },
-      { key: 'L2piece3', edges: 4, count: 5, scale: 0.07, sidebarScale: 0.07 },
+      { key: 'L2piece3', edges: 4, count: 4, scale: 0.07, sidebarScale: 0.07 },
       { key: 'L2piece4', edges: 5, count: 3, scale: 0.115, sidebarScale: 0.11 },
     ];
   }
@@ -35,10 +35,10 @@ export class PublicTransport extends BaseLevel {
    */
   getPieceLabel(pieceKey, edges) {
     const labels = {
-      'L2piece1': `Tram: ${edges} routes`,
-      'L2piece2': `Bus: ${edges} routes`,
-      'L2piece3': `Train: ${edges} routes`,
-      'L2piece4': `Metro: ${edges} routes`
+      'L2piece1': `Tram: ${edges} footpaths`,
+      'L2piece2': `Bus: ${edges} footpaths`,
+      'L2piece3': `Train: ${edges} footpaths`,
+      'L2piece4': `Metro: ${edges} footpaths`
     };
     return labels[pieceKey] || `Piece: ${edges} edge${edges !== 1 ? 's' : ''}`;
   }
@@ -67,35 +67,27 @@ export class PublicTransport extends BaseLevel {
     return {
       piece: 'stop',
       pieces: 'stops',
-      connection: 'route',
-      connections: 'routes',
+      connection: 'footpath',
+      connections: 'footpaths',
     };
   }
 
   /**
-   * PublicTransport: all pieces can connect with each other
+   * PublicTransport: only different-type stops can be connected
    */
   canConnectPieces(piece1, piece2) {
-    return true;
+    return piece1.pieceType !== piece2.pieceType;
   }
 
-  /**
-   * PublicTransport additional win condition:
-   * Each piece must be connected to at least one other piece of the same type
-   */
-  checkAdditionalSolvedConditions() {
-    // Check that every piece has at least one connection to a piece of the same type
-    for (const piece of this.pieces) {
-      const hasSameTypeConnection = piece.connections.some(
-        connectedPiece => connectedPiece.pieceType === piece.pieceType
-      );
-      
-      if (!hasSameTypeConnection) {
-        return false; // Found a piece without a same-type connection
-      }
-    }
-    
-    return true; // All pieces have at least one same-type connection
+  getConnectionRejectionMessage(piece1, piece2) {
+    const names = {
+      'L2piece1': 'Tram',
+      'L2piece2': 'Bus',
+      'L2piece3': 'Train',
+      'L2piece4': 'Metro'
+    };
+    const name = names[piece1.pieceType] || 'stop';
+    return `Two ${name.toLowerCase()} stops can't be connected — there's already a ${name.toLowerCase()} running between them!`;
   }
 
   /**
@@ -103,25 +95,25 @@ export class PublicTransport extends BaseLevel {
    */
   getLevelInstructions() {
     return `**Scenario:**
-You have been tasked with designing Sydney's public transport network. Connect tram, bus, train and metro stops into a single transport network.
+Sydney's public transport network needs footpaths connecting its various transit stops so that commuters can walk between different services. Each stop needs a certain number of footpaths depending on how busy it is.
 
 **Stop types:**
-• Tram — 2 routes
-• Bus — 3 routes
-• Train — 4 routes
-• Metro — 5 routes
+• Tram — 2 footpaths
+• Bus — 3 footpaths
+• Train — 4 footpaths
+• Metro — 5 footpaths
 
 **Special rule:**
-Each stop must be connected to at least one other stop of the **same type**. For example, every tram stop must link to at least one other tram stop.
+Footpaths can only connect stops of different types. There's no point building a footpath between two train stops when there's already a train running between them!
 
 **How to play:**
 • Drag stops from the sidebar onto the map to place them
-• Click two stops to connect them with a route
-• Click two connected stops again to remove the route
-• Routes cannot cross — no tangled transit lines!
+• Click two stops to connect them with a footpath
+• Click two connected stops again to remove the footpath
+• Footpaths cannot cross — no tangled walkways!
 • Drag a stop back to the sidebar to remove it
 
 **Objective:**
-Build a connected transport network where every stop has the right number of routes and is linked to at least one stop of the same type.`;
+Build a connected network of footpaths where every stop has the right number of connections and no two stops of the same type are directly linked.`;
   }
 }

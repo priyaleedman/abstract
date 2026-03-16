@@ -39,7 +39,7 @@ export class ProgressManager {
   /**
    * Get the status of a specific level
    * @param {string} levelKey - Level identifier (e.g. 'Level1', 'Level2')
-   * @returns {string} Status: 'solved', 'unsolved', or 'locked'
+   * @returns {string} Status: 'solved', 'previously_solved', 'unsolved', or 'locked'
    */
   static getLevelStatus(levelKey) {
     const progress = this.getProgress();
@@ -73,13 +73,18 @@ export class ProgressManager {
   }
 
   /**
-   * Clear progress for a specific level (for redoing)
+   * Clear progress for a specific level (for redoing).
+   * If the level was solved, it becomes 'previously_solved' so it
+   * remains playable but doesn't block unlock slots.
    * @param {string} levelKey - Level identifier
    */
   static clearLevel(levelKey) {
     const progress = this.getProgress();
     if (progress.levels[levelKey]) {
-      delete progress.levels[levelKey];
+      const wasSolved = progress.levels[levelKey].status === 'solved';
+      delete progress.levels[levelKey].solution;
+      delete progress.levels[levelKey].inProgress;
+      progress.levels[levelKey].status = wasSolved ? 'previously_solved' : 'unsolved';
       this.saveProgress(progress);
     }
   }
