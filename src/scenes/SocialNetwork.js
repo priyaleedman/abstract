@@ -66,29 +66,24 @@ export class SocialNetwork extends BaseLevel {
   }
 
   getLevelInstructions() {
-    return `Welcome to the Social Network!
+    return `**Scenario:**
+Five friends — Alice, Bob, Carol, David, and Ed — are in a social group. Each person has a certain number of close friendships.
 
-**Scenario:**
-Five friends — Alice, Bob, Carol, David, and Ed — are in a social group. Each person has a certain number of friends.
-
-**Your task:**
-Reconstruct their social network by placing each person on the board and connecting friends together.
-
-**Clues:**
-• Alice has 2 friends
-• Bob has 3 friends
-• Carol has 2 friends
-• David has 1 friend
-• Ed has 2 friends
+**Friendships:**
+• Alice — 2 friends
+• Bob — 3 friends
+• Carol — 2 friends
+• David — 1 friend
+• Ed — 2 friends
 
 **How to play:**
-• Drag each person from the sidebar onto the play area
+• Drag people from the sidebar onto the play area
 • Click two people to create a friendship between them
-• Click a friendship to remove it
-• Friendships cannot cross each other
+• Click two connected people again to remove the friendship
+• Friendships cannot cross — people talk behind each other's backs enough already!
 • Drag a person back to the sidebar to remove them
 
 **Objective:**
-Create a connected social network where everyone has exactly the right number of friends.`;
+Build a connected social network where everyone has exactly the right number of friends.`;
   }
 }

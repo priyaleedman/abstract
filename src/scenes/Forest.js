@@ -284,10 +284,8 @@ export class Forest extends BaseLevel {
   // ── Instructions ────────────────────────────────────────────────────
 
   getLevelInstructions() {
-    return `Welcome to the Food Web!
-
-**Scenario:**
-In this ecosystem, organisms are connected through feeding relationships. Each link in the web represents a "who eats whom" relationship.
+    return `**Scenario:**
+In this ecosystem, organisms are connected through feeding relationships. Each link represents a "who eats whom" relationship.
 
 **Who eats what:**
 • Rabbits eat carrots and grass
@@ -299,10 +297,10 @@ In this ecosystem, organisms are connected through feeding relationships. Each l
 
 **How to play:**
 • Drag organisms from the sidebar onto the play area
-• Click two organisms to create a link between them
+• Click two organisms to create a feeding link between them
+• Click two connected organisms again to remove the link
 • Only organisms with a feeding relationship can be linked
-• Click a link to remove it
-• Links are allowed to cross each other
+• Links are allowed to cross — nature is messy!
 • Drag an organism back to the sidebar to remove it
 • Scroll the sidebar to see all organisms
 

@@ -68,17 +68,23 @@ export class Settlements extends BaseLevel {
    * Settlements instructions
    */
   getLevelInstructions() {
-    return `**Objective:**  Your mission is to build a series of villages in a new territory. You must connect the settlements to each other using roads, with each settlement requiring a certain number of roads depending on its size.
+    return `**Scenario:**
+You are building a network of settlements in a new territory. Each settlement needs a certain number of roads depending on its size.
 
-**How to Play:**
+**Settlement types:**
+• Inn — 1 road
+• Hamlet — 2 roads
+• Village — 3 roads
+• Town — 4 roads
+
+**How to play:**
 • Drag settlements from the sidebar onto the map to place them
 • Click two settlements to connect them with a road
-• Click a road to remove it
-• All settlements can connect with each other
-• Roads cannot cross
-• Settlements cannot overlap each other or be placed on top of roads
+• Click two connected settlements again to remove the road
+• Roads cannot cross — the terrain is too rugged for intersections!
 • Drag a settlement back to the sidebar to remove it
 
-**Win Condition:**  All settlements placed and fully connected.`;
+**Objective:**
+Build a connected network where every settlement has exactly the right number of roads.`;
   }
 }

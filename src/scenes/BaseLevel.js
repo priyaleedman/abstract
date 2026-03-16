@@ -1127,17 +1127,18 @@ export class BaseLevel extends Phaser.Scene {
    */
   getLevelInstructions() {
     const t = this.getTerminology();
-    return `Complete the puzzle by connecting all ${t.pieces}.
+    return `**Scenario:**
+Connect all ${t.pieces} into a single network.
 
-**How to Play:**
+**How to play:**
 • Drag ${t.pieces} from the sidebar onto the play area to place them
 • Click two ${t.pieces} to create a ${t.connection} between them
-• Click a ${t.connection} to remove it
+• Click two connected ${t.pieces} again to remove the ${t.connection}
 • ${t.connections.charAt(0).toUpperCase() + t.connections.slice(1)} cannot cross
-• ${t.pieces.charAt(0).toUpperCase() + t.pieces.slice(1)} cannot overlap each other
 • Drag a ${t.piece} back to the sidebar to remove it
 
-**Objective:** Create a connected graph where each ${t.piece} uses all of its available ${t.connections}.`;
+**Objective:**
+Build a connected network where each ${t.piece} has exactly the right number of ${t.connections}.`;
   }
 
   /**

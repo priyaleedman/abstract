@@ -82,8 +82,8 @@ export class Map extends Phaser.Scene {
       imageKey: 'snail-icon', imageScale: 8,
       label: 'Leaf no node unturned',
       labelOffsetY: 75, locked: !unlockedKeys.has('Forest'),
-      bgScale: 0.028, bgOffsetY: 20,
-      tickOffsetX: 70, tickOffsetY: -40
+      bgScale: 0.028, bgOffsetY: 15,
+      tickOffsetX: 90, tickOffsetY: -50
     });
 
     this.createLevelButton({
@@ -91,7 +91,7 @@ export class Map extends Phaser.Scene {
       imageKey: 'city-icon', imageScale: 0.08,
       label: 'Highway to the\ngraph zone',
       labelOffsetY: 75, locked: !unlockedKeys.has('Cities'),
-      bgScale: 2.8, bgOffsetY: 40,
+      bgScale: 2.8, bgOffsetY: 30,
       tickOffsetX: 65, tickOffsetY: -25
     });
 
@@ -141,6 +141,59 @@ export class Map extends Phaser.Scene {
       backButton.setStyle({ fontStyle: 'normal' });
     });
     backButton.on('pointerdown', () => this.scene.start('Start'));
+
+    // Check if all levels are completed
+    const allSolved = unlockOrder.every(key => ProgressManager.getLevelStatus(key) === 'solved');
+    const completionShown = localStorage.getItem('abstract_completion_shown');
+    if (allSolved && !completionShown) {
+      localStorage.setItem('abstract_completion_shown', 'true');
+      this.showCompletionPopup(width, height);
+    }
+  }
+
+  showCompletionPopup(width, height) {
+    const overlay = this.add.rectangle(width / 2, height / 2, width, height, 0xffffff, 0.95)
+      .setDepth(50)
+      .setInteractive();
+
+    this.add.text(width / 2, height / 2 - 80, 'Congratulations!', {
+      fontSize: '44px',
+      color: '#000',
+      fontStyle: 'bold',
+      align: 'center'
+    }).setOrigin(0.5).setDepth(51);
+
+    this.add.text(width / 2, height / 2, 'You have completed every level in Abstract.\nThank you for playing!', {
+      fontSize: '24px',
+      color: '#555',
+      align: 'center',
+      lineSpacing: 8
+    }).setOrigin(0.5).setDepth(51);
+
+    const closeBtn = this.add.text(width / 2, height / 2 + 100, 'Return to Map', {
+      fontSize: '28px',
+      fill: '#007bff',
+      align: 'center'
+    })
+      .setOrigin(0.5)
+      .setInteractive({ useHandCursor: true })
+      .setDepth(51);
+
+    const originalScale = closeBtn.scaleX;
+    closeBtn.on('pointerover', () => {
+      closeBtn.setScale(originalScale * 1.08);
+      closeBtn.setStyle({ fontStyle: 'bold' });
+    });
+    closeBtn.on('pointerout', () => {
+      closeBtn.setScale(originalScale);
+      closeBtn.setStyle({ fontStyle: 'normal' });
+    });
+    closeBtn.on('pointerdown', () => {
+      overlay.destroy();
+      this.children.list.filter(c => c.depth >= 51).forEach(c => c.destroy());
+    });
+
+    overlay.on('pointerdown', () => {});
   }
 
   /**

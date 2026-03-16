@@ -59,13 +59,8 @@ export class Cities extends BaseLevel {
   }
 
   getLevelInstructions() {
-    return `Welcome to the Highway Network!
-
-**Scenario:**
+    return `**Scenario:**
 A region of cities needs to be connected by highways. Each city can support a fixed number of highway connections depending on its size.
-
-**Your task:**
-Place cities on the board and connect them with highways so every city uses all of its available connections and the entire network is linked.
 
 **City types:**
 • Hamlet — 1 highway
@@ -76,8 +71,8 @@ Place cities on the board and connect them with highways so every city uses all 
 **How to play:**
 • Drag cities from the sidebar onto the play area
 • Click two cities to build a highway between them
-• Click a highway to remove it
-• Highways cannot cross each other
+• Click two connected cities again to remove the highway
+• Highways cannot cross — no overpasses allowed in this budget!
 • Drag a city back to the sidebar to remove it
 
 **Objective:**

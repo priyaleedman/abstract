@@ -19,14 +19,14 @@ export class PublicTransport extends BaseLevel {
 
   /**
    * Define PublicTransport pieces with edges 2-5
-   * Total edges: (2*4) + (3*4) + (4*6) + (5*4) = 8 + 12 + 24 + 20 = 64 (even) ✓
+   * Total edges: (2*3) + (3*3) + (4*5) + (5*3) = 6 + 9 + 20 + 15 = 50 (even) ✓
    */
   getPieceTypes() {
     return [
-      { key: 'L2piece1', edges: 2, count: 4, scale: 0.07, sidebarScale: 0.1 },
-      { key: 'L2piece2', edges: 3, count: 4, scale: 0.035, sidebarScale: 0.04 },
-      { key: 'L2piece3', edges: 4, count: 6, scale: 0.06, sidebarScale: 0.07 },
-      { key: 'L2piece4', edges: 5, count: 4, scale: 0.1, sidebarScale: 0.11 },
+      { key: 'L2piece1', edges: 2, count: 3, scale: 0.09, sidebarScale: 0.1 },
+      { key: 'L2piece2', edges: 3, count: 3, scale: 0.037, sidebarScale: 0.04 },
+      { key: 'L2piece3', edges: 4, count: 5, scale: 0.07, sidebarScale: 0.07 },
+      { key: 'L2piece4', edges: 5, count: 3, scale: 0.115, sidebarScale: 0.11 },
     ];
   }
 
@@ -102,17 +102,26 @@ export class PublicTransport extends BaseLevel {
    * PublicTransport instructions
    */
   getLevelInstructions() {
-    return `**Objective:**  You have been tasked with designing Sydney's public transport network. You must connect tram, bus, train and metro stops to each other. Each stop requires a certain number of routes and each type of stop must be connected to at least one other stop of the same type.
+    return `**Scenario:**
+You have been tasked with designing Sydney's public transport network. Connect tram, bus, train and metro stops into a single transport network.
 
-**How to Play:**
+**Stop types:**
+• Tram — 2 routes
+• Bus — 3 routes
+• Train — 4 routes
+• Metro — 5 routes
+
+**Special rule:**
+Each stop must be connected to at least one other stop of the **same type**. For example, every tram stop must link to at least one other tram stop.
+
+**How to play:**
 • Drag stops from the sidebar onto the map to place them
 • Click two stops to connect them with a route
-• Click a route to remove it
-• All stops can connect with each other
-• Routes cannot cross
-• Stops cannot overlap each other or be placed on top of routes
+• Click two connected stops again to remove the route
+• Routes cannot cross — no tangled transit lines!
 • Drag a stop back to the sidebar to remove it
 
-**Win Condition:**  All stops placed and fully connected. Each stop must have at least one same-type connection.`;
+**Objective:**
+Build a connected transport network where every stop has the right number of routes and is linked to at least one stop of the same type.`;
   }
 }

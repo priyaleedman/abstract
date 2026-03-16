@@ -90,21 +90,22 @@ export class Molecule extends BaseLevel {
   }
 
   getLevelInstructions() {
-    return `**Objective:**  You are a researcher in a molecular biology lab tasked with building a caffeine molecule (C₈H₁₀N₄O₂). You must correctly bond hydrogen, carbon, nitrogen and oxygen atoms following the laws of chemistry.
+    return `**Scenario:**
+You are a researcher tasked with building a caffeine molecule (C₈H₁₀N₄O₂). Bond hydrogen, carbon, nitrogen and oxygen atoms following the laws of chemistry.
 
-**How to Play:**
+**Bonding rules:**
+• Carbon (C) — bonds with everything (hydrogen, oxygen, nitrogen, carbon)
+• Hydrogen (H), Oxygen (O), Nitrogen (N) — only bond with carbon
+
+**How to play:**
 • Drag atoms from the sidebar onto the workspace to place them
 • Click two atoms to create a bond between them
-• Click a bond to remove it
-• Each atom can only bond with specific other elements (see rules below)
-• Bonds cannot cross
-• Atoms cannot overlap each other or be placed on top of bonds
+• Click two bonded atoms again to remove the bond
+• Only atoms that follow the bonding rules can be connected
+• Bonds cannot cross — molecules are flat structures!
 • Drag an atom back to the sidebar to remove it
 
-**Bonding Rules:**
-• Carbon (C): bonds with everything (hydrogen, oxygen, nitrogen, carbon)
-• Hydrogen (H), Oxygen (O), Nitrogen (N): only bond with carbon
-
-**Win Condition:**  All atoms placed and fully connected following the bonding rules.`;
+**Objective:**
+Build a connected caffeine molecule where every atom has exactly the right number of bonds.`;
   }
 }
