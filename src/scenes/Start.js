@@ -76,6 +76,12 @@ export class Start extends Phaser.Scene {
         playbutton.on('pointerdown', () => {
             this.scene.start('Map');
         });
+
+        // --- Byline ---
+        this.add.text(1260, 700, 'By Priya Leedman', {
+            fontSize: '16px',
+            color: '#1a5fa8',
+        }).setOrigin(1, 1).setDepth(2);
     }
 
     update() {
