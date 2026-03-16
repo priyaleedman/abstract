@@ -49,13 +49,13 @@ export class Forest extends BaseLevel {
     return [
       { key: 'grass',  edges: 3, count: 1, scale: 0.9, sidebarScale: 0.9 },
       { key: 'carrot', edges: 1, count: 1, scale: 2.4, sidebarScale: 2.4 },
-      { key: 'grains', edges: 2, count: 1, scale: 0.06, sidebarScale: 0.06 },
+      { key: 'grains', edges: 2, count: 1, scale: 0.5, sidebarScale: 0.5 },
       { key: 'rabbit', edges: 3, count: 1, scale: 4.5, sidebarScale: 4.5 },
-      { key: 'mouse',  edges: 5, count: 1, scale: 0.05, sidebarScale: 0.05 },
+      { key: 'mouse',  edges: 5, count: 1, scale: 0.5, sidebarScale: 0.5 },
       { key: 'snail',  edges: 3, count: 1, scale: 5, sidebarScale: 5 },
       { key: 'bird',   edges: 3, count: 1, scale: 7, sidebarScale: 7 },
       { key: 'fox',    edges: 2, count: 1, scale: 2.2, sidebarScale: 2.2 },
-      { key: 'owl',    edges: 2, count: 1, scale: 0.065, sidebarScale: 0.065 },
+      { key: 'owl',    edges: 2, count: 1, scale: 0.499, sidebarScale: 0.499 },
     ];
   }
 

@@ -68,10 +68,10 @@ export class Map extends Phaser.Scene {
     });
 
     this.createLevelButton({
-      levelKey: 'PowerGrid', x: width - row1Spacing, y: row1Y,
-      imageKey: 'powertower', imageScale: 0.07,
-      label: 'Ohm-azing circuits', labelOffsetY: 80,
-      bgScale: 3, bgOffsetY: 30, tickOffsetX: 60,
+      levelKey: 'PowerGrid', x: width - row1Spacing, y: row1Y +17,
+      imageKey: 'powertower', imageScale: 0.4375,
+      label: 'Ohm-azing circuits', labelOffsetY: 68,
+      bgScale: 0.45, bgOffsetY: 5, tickOffsetX: 60,
       locked: !unlockedKeys.has('PowerGrid')
     });
 

@@ -15,10 +15,10 @@ export class PowerGrid extends BaseLevel {
 
   getPieceTypes() {
     return [
-      { key: 'tower1', edges: 1, count: 2, scale: 0.08, sidebarScale: 0.06 },
-      { key: 'tower2', edges: 2, count: 2, scale: 0.08, sidebarScale: 0.06 },
-      { key: 'tower3', edges: 3, count: 2, scale: 0.08, sidebarScale: 0.06 },
-      { key: 'tower4', edges: 4, count: 2, scale: 0.08, sidebarScale: 0.06 },
+      { key: 'tower1', edges: 1, count: 2, scale: 0.5, sidebarScale: 0.375 },
+      { key: 'tower2', edges: 2, count: 2, scale: 0.5, sidebarScale: 0.375 },
+      { key: 'tower3', edges: 3, count: 2, scale: 0.5, sidebarScale: 0.375 },
+      { key: 'tower4', edges: 4, count: 2, scale: 0.5, sidebarScale: 0.375 },
     ];
   }
 
