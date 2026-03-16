@@ -80,7 +80,7 @@ A region needs its power towers connected into a single network. Each tower has 
 • Drag towers from the sidebar onto the play area
 • Click two towers to run a power line between them
 • Click two connected towers again to remove the power line
-• Power lines cannot cross each other — crossing wires is a safety hazard!
+• Power lines cannot cross each other because crossing wires is a safety hazard
 • Drag a tower back to the sidebar to remove it
 
 **Objective:**

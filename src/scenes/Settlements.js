@@ -81,7 +81,7 @@ You are building a network of settlements in a new territory. Each settlement ne
 • Drag settlements from the sidebar onto the map to place them
 • Click two settlements to connect them with a road
 • Click two connected settlements again to remove the road
-• Roads cannot cross — the terrain is too rugged for intersections!
+• Roads cannot cross since the terrain is too rugged for intersections!
 • Drag a settlement back to the sidebar to remove it
 
 **Objective:**
