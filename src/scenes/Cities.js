@@ -63,10 +63,10 @@ export class Cities extends BaseLevel {
 A region of cities needs to be connected by highways. Each city can support a fixed number of highway connections depending on its size.
 
 **City types:**
-• Hamlet — 1 highway
-• Town — 2 highways
-• City — 3 highways
-• Metropolis — 4 highways
+• Town — 1 highway
+• City — 2 highways
+• Metropolis — 3 highways
+• Megacity — 4 highways
 
 **How to play:**
 • Drag cities from the sidebar onto the play area

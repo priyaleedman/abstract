@@ -300,7 +300,7 @@ In this ecosystem, organisms are connected through feeding relationships. Each l
 • Click two organisms to create a feeding link between them
 • Click two connected organisms again to remove the link
 • Only organisms with a feeding relationship can be linked
-• Links are allowed to cross — nature is messy!
+• Links are allowed to cross in this level
 • Drag an organism back to the sidebar to remove it
 • Scroll the sidebar to see all organisms
 
