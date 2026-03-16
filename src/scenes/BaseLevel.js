@@ -524,6 +524,8 @@ export class BaseLevel extends Phaser.Scene {
       this.createBadge(piece);
     }
 
+    this.onPiecePlaced(piece);
+
     return piece;
   }
 
@@ -717,6 +719,7 @@ export class BaseLevel extends Phaser.Scene {
     this.edges.push({ p1: a, p2: b });
     a.connections.push(b);
     b.connections.push(a);
+    this.onEdgeCreated(a, b);
 
     a.clearTint();
     this._highlightedPiece = null;
@@ -898,6 +901,12 @@ export class BaseLevel extends Phaser.Scene {
     // Default: no additional conditions
     return true;
   }
+
+  /** Called after a piece is placed on the board from the sidebar */
+  onPiecePlaced(piece) {}
+
+  /** Called after an edge is created between two pieces */
+  onEdgeCreated(piece1, piece2) {}
 
   isGraphConnected() {
     if (this.pieces.length === 0) return false;
