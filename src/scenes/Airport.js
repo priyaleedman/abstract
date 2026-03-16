@@ -71,4 +71,8 @@ export class Airport extends BaseLevel {
     return 55;
   }
 
+  usePixelPerfectHit() {
+    return false;
+  }
+
 }

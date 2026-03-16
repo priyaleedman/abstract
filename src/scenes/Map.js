@@ -17,6 +17,7 @@ export class Map extends Phaser.Scene {
     this.load.image('powertower', 'assets/PowerTower.PNG');
     this.load.image('snail-icon', 'assets/Snail.PNG');
     this.load.image('city-icon', 'assets/City.PNG');
+    this.load.image('lock', 'assets/Lock.PNG');
   }
 
   create() {
@@ -47,10 +48,10 @@ export class Map extends Phaser.Scene {
     const row1Spacing = width / 4;
 
     this.createLevelButton({
-      levelKey: 'Airport', x: row1Spacing, y: row1Y+ 28,
-      imageKey: 'airport', imageScale: 0.08,
+      levelKey: 'Airport', x: row1Spacing, y: row1Y+ 15,
+      imageKey: 'airport', imageScale: 0.09,
       label: 'Air-planar',
-      labelOffsetY: 55, locked: !unlockedKeys.has('Airport'),
+      labelOffsetY: 70, locked: !unlockedKeys.has('Airport'),
       bgScale: 2.8, bgOffsetX: 15, bgOffsetY: 20,
       tickOffsetX: 100, tickOffsetY: -40
     });
@@ -186,8 +187,20 @@ export class Map extends Phaser.Scene {
     }).setOrigin(0.5, 0);
 
     if (locked) {
+      this.add.image(x + bgOffsetX, y + bgOffsetY, 'green-background')
+        .setScale(imageScale * bgScale)
+        .setAlpha(0.35)
+        .setTint(0x000000)
+        .setDepth(-1);
+
       levelImage.setTint(0x555555).setAlpha(0.98);
       labelText.setVisible(false);
+
+      this.add.image(x + tickOffsetX, y + tickOffsetY, 'lock')
+        .setScale(0.04)
+        .setOrigin(0.5)
+        .setDepth(10);
+
       return;
     }
 

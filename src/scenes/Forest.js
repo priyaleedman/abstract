@@ -76,6 +76,17 @@ export class Forest extends BaseLevel {
     return false;
   }
 
+  usePixelPerfectHit() {
+    return false;
+  }
+
+  getEdgeAnchorOffset(piece) {
+    if (piece && piece.pieceType === 'rabbit') {
+      return { x: -20, y: 40 };
+    }
+    return { x: 0, y: 0 };
+  }
+
   getTerminology() {
     return {
       piece: 'organism',
@@ -129,7 +140,9 @@ export class Forest extends BaseLevel {
 
       const piece = this.add.image(sidebarX, baseY, type.key)
         .setScale(type.sidebarScale)
-        .setInteractive({ useHandCursor: true, draggable: true })
+        .setInteractive(this.usePixelPerfectHit(type.key)
+          ? { pixelPerfect: true, alphaTolerance: 128, useHandCursor: true, draggable: true }
+          : { useHandCursor: true, draggable: true })
         .setMask(sidebarMask);
 
       this.sidebarPieces.push(piece);
@@ -142,7 +155,10 @@ export class Forest extends BaseLevel {
         fontSize: '14px', color: '#999999', align: 'center'
       }).setOrigin(0.5, 0).setMask(sidebarMask);
 
-      if (type.count === 0) piece.setTint(0x888888);
+      if (type.count === 0) {
+        piece.setTint(this.getDepletedTint());
+        piece.disableInteractive();
+      }
 
       this._scrollItems.push({ obj: piece, baseY });
       this._scrollItems.push({ obj: label, baseY: baseY + labelYOff });
@@ -195,9 +211,25 @@ export class Forest extends BaseLevel {
                            dropY >= this.gameplayBounds.minY && dropY <= this.gameplayBounds.maxY;
 
         if (inGameplay && type.count > 0) {
+          const minDist = 60;
+          const overlapping = this.pieces.some(other => {
+            const dx = dropX - other.x;
+            const dy = dropY - other.y;
+            return Math.sqrt(dx * dx + dy * dy) < minDist;
+          });
+          if (overlapping) {
+            const t = this.getTerminology();
+            this.showNotification(`${t.pieces.charAt(0).toUpperCase() + t.pieces.slice(1)} cannot overlap each other.`);
+            this._sidebarDropBlocked = true;
+            this.time.delayedCall(100, () => { this._sidebarDropBlocked = false; });
+            return;
+          }
           this.spawnPiece(type, dropX, dropY);
           type.count -= 1;
-          if (type.count === 0) piece.setTint(0x888888);
+          if (type.count === 0) {
+            piece.setTint(this.getDepletedTint());
+            piece.disableInteractive();
+          }
           this.saveProgress();
         }
       });
@@ -217,8 +249,28 @@ export class Forest extends BaseLevel {
         this._scrollItems.forEach(item => {
           item.obj.y = item.baseY - this._scrollOffset;
         });
+
+        if (this._scrollIndicator) {
+          const atBottom = this._scrollOffset >= this._maxScroll;
+          const atTop = this._scrollOffset <= 0;
+          if (atBottom) {
+            this._scrollIndicator.setText('↑ Scroll up ↑');
+          } else if (atTop) {
+            this._scrollIndicator.setText('↓ Scroll down ↓');
+          } else {
+            this._scrollIndicator.setText('↕ Scroll ↕');
+          }
+        }
       }
     };
+
+    // Scroll indicator — shown only when there is scrollable content
+    this._scrollIndicator = null;
+    if (this._maxScroll > 0) {
+      this._scrollIndicator = this.add.text(sidebarX, visibleTop - 20, '↓ Scroll down ↓', {
+        fontSize: '13px', color: '#999999', align: 'center'
+      }).setOrigin(0.5, 1).setDepth(20);
+    }
 
     this.game.canvas.addEventListener('wheel', this._sidebarWheelHandler);
     this.events.once('shutdown', () => {

@@ -46,8 +46,13 @@ export class PublicTransport extends BaseLevel {
   /**
    * Override count label position (make it lower)
    */
-  getBadgeOffset() {
-    return { xOffset: 60, yOffset: -25 };
+  getBadgeOffset(piece) {
+    if (piece && piece.pieceType === 'L2piece2') {
+      return { xOffset: 60, yOffset: -25 };
+    } else if (piece && piece.pieceType === 'L2piece1') {
+      return { xOffset: 45, yOffset: -20 };
+    }
+    return { xOffset: 48, yOffset: -23 };
   }
 
   getCountLabelOffset() {

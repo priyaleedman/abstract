@@ -33,6 +33,10 @@ export class PowerGrid extends BaseLevel {
     return `${name}: ${edges} line${edges !== 1 ? 's' : ''}`;
   }
 
+  usePixelPerfectHit() {
+    return false;
+  }
+
   getDepletedTint() {
     return 0x444444;
   }

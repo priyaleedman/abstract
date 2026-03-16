@@ -160,6 +160,34 @@ export class BaseLevel extends Phaser.Scene {
   }
 
   /**
+   * Override to disable pixel-perfect hit testing for specific piece types.
+   * When false, the entire image bounds (including transparent pixels) are clickable.
+   * @param {string} pieceKey
+   * @returns {boolean} Whether to use pixel-perfect hit testing, default true
+   */
+  usePixelPerfectHit(pieceKey) {
+    return true;
+  }
+
+  /**
+   * Override in child classes to shift the edge anchor point for specific piece types.
+   * Return {x, y} offsets relative to the piece's position.
+   * @param {Phaser.GameObjects.Image} piece
+   * @returns {{ x: number, y: number }}
+   */
+  getEdgeAnchorOffset(piece) {
+    return { x: 0, y: 0 };
+  }
+
+  /**
+   * Get the actual edge connection point for a piece, accounting for anchor offsets.
+   */
+  getEdgeAnchor(piece) {
+    const offset = this.getEdgeAnchorOffset(piece);
+    return { x: piece.x + offset.x, y: piece.y + offset.y };
+  }
+
+  /**
    * Override this method in child classes to hide the "x N" piece count badge
    * in the sidebar (useful when each piece type has only one instance).
    * @returns {boolean} Whether to show the count label next to each sidebar piece
@@ -225,7 +253,9 @@ export class BaseLevel extends Phaser.Scene {
       const y = topPadding + (spacing * i);
       const piece = this.add.image(sidebarX, y, type.key)
         .setScale(type.sidebarScale)
-        .setInteractive({ useHandCursor: true, draggable: true });
+        .setInteractive(this.usePixelPerfectHit(type.key)
+          ? { pixelPerfect: true, alphaTolerance: 128, useHandCursor: true, draggable: true }
+          : { useHandCursor: true, draggable: true });
 
       this.sidebarPieces.push(piece); // Store reference
       this.input.setDraggable(piece);
@@ -251,9 +281,10 @@ export class BaseLevel extends Phaser.Scene {
         align: 'center'
       }).setOrigin(0.5, 0);
 
-      // Grey out piece if count is already 0 (e.g., when viewing solved level)
+      // Grey out and disable piece if count is already 0 (e.g., when viewing solved level)
       if (type.count === 0) {
         piece.setTint(this.getDepletedTint());
+        piece.disableInteractive();
       }
 
       // Hover effect for sidebar pieces and counter
@@ -320,11 +351,26 @@ export class BaseLevel extends Phaser.Scene {
                            dropY >= this.gameplayBounds.minY && dropY <= this.gameplayBounds.maxY;
 
         if (inGameplay && type.count > 0) {
+          // Check if drop location overlaps an existing piece
+          const minDist = 60;
+          const overlapping = this.pieces.some(other => {
+            const dx = dropX - other.x;
+            const dy = dropY - other.y;
+            return Math.sqrt(dx * dx + dy * dy) < minDist;
+          });
+          if (overlapping) {
+            const t = this.getTerminology();
+            this.showNotification(`${t.pieces.charAt(0).toUpperCase() + t.pieces.slice(1)} cannot overlap each other.`);
+            this._sidebarDropBlocked = true;
+            this.time.delayedCall(100, () => { this._sidebarDropBlocked = false; });
+            return;
+          }
           this.spawnPiece(type, dropX, dropY);
           type.count -= 1;
           if (counterText) counterText.setText(`x${type.count}`);
           if (type.count === 0) {
             piece.setTint(this.getDepletedTint());
+            piece.disableInteractive();
           }
           this.saveProgress();
         }
@@ -341,7 +387,9 @@ export class BaseLevel extends Phaser.Scene {
 
     // Only make interactive if explicitly enabled AND not viewing solved
     if (enableInteraction && !this.isViewingSolved) {
-      piece.setInteractive({ draggable: true, useHandCursor: true });
+      piece.setInteractive(this.usePixelPerfectHit(type.key)
+        ? { pixelPerfect: true, alphaTolerance: 128, draggable: true, useHandCursor: true }
+        : { draggable: true, useHandCursor: true });
     }
 
     piece.edgeCount = type.edges;
@@ -555,9 +603,12 @@ export class BaseLevel extends Phaser.Scene {
       this.sidebarCounters[typeIndex].setText(`x${pieceType.count}`);
     }
 
-    // Remove grey tint from sidebar piece if count is now > 0
+    // Re-enable sidebar piece if count is now > 0
     if (pieceType.count > 0 && this.sidebarPieces && this.sidebarPieces[typeIndex]) {
       this.sidebarPieces[typeIndex].clearTint();
+      this.sidebarPieces[typeIndex].setInteractive(this.usePixelPerfectHit(pieceType.key)
+        ? { pixelPerfect: true, alphaTolerance: 128, useHandCursor: true, draggable: true }
+        : { useHandCursor: true, draggable: true });
     }
 
     // Destroy badge and piece
@@ -574,6 +625,9 @@ export class BaseLevel extends Phaser.Scene {
   }
 
   handlePieceClick(piece) {
+    // Ignore clicks caused by a blocked sidebar drop
+    if (this._sidebarDropBlocked) return;
+
     // Don't allow interactions when viewing solved level
     if (this.isViewingSolved) {
       return;
@@ -709,7 +763,7 @@ export class BaseLevel extends Phaser.Scene {
    * Check if a piece overlaps any other piece based on display size
    */
   isOverlappingOtherPiece(piece) {
-    const minDist = 30;
+    const minDist = 60;
     for (const other of this.pieces) {
       if (other === piece) continue;
       const dx = piece.x - other.x;
@@ -727,10 +781,12 @@ export class BaseLevel extends Phaser.Scene {
     const threshold = 15;
     for (const edge of this.edges) {
       if (edge.p1 === piece || edge.p2 === piece) continue;
+      const ea1 = this.getEdgeAnchor(edge.p1);
+      const ea2 = this.getEdgeAnchor(edge.p2);
       const dist = this.pointToSegmentDistance(
         piece.x, piece.y,
-        edge.p1.x, edge.p1.y,
-        edge.p2.x, edge.p2.y
+        ea1.x, ea1.y,
+        ea2.x, ea2.y
       );
       if (dist < threshold) return true;
     }
@@ -753,20 +809,32 @@ export class BaseLevel extends Phaser.Scene {
   }
 
   edgeWouldIntersectPieces(p1, p2) {
+    const a1 = this.getEdgeAnchor(p1);
+    const a2 = this.getEdgeAnchor(p2);
     for (const edge of this.edges) {
       if (edge.p1 === p1 || edge.p2 === p1 || edge.p1 === p2 || edge.p2 === p2) continue;
-      if (this.linesIntersect(p1.x, p1.y, p2.x, p2.y, edge.p1.x, edge.p1.y, edge.p2.x, edge.p2.y))
+      const ea1 = this.getEdgeAnchor(edge.p1);
+      const ea2 = this.getEdgeAnchor(edge.p2);
+      if (this.linesIntersect(a1.x, a1.y, a2.x, a2.y, ea1.x, ea1.y, ea2.x, ea2.y))
         return true;
     }
     return false;
   }
 
   wouldCauseIntersection(movedPiece, newX, newY) {
+    const movedOffset = this.getEdgeAnchorOffset(movedPiece);
     const coords = this.edges.map(e => {
-      const x1 = (e.p1 === movedPiece) ? newX : e.p1.x;
-      const y1 = (e.p1 === movedPiece) ? newY : e.p1.y;
-      const x2 = (e.p2 === movedPiece) ? newX : e.p2.x;
-      const y2 = (e.p2 === movedPiece) ? newY : e.p2.y;
+      let x1, y1, x2, y2;
+      if (e.p1 === movedPiece) {
+        x1 = newX + movedOffset.x; y1 = newY + movedOffset.y;
+      } else {
+        const a = this.getEdgeAnchor(e.p1); x1 = a.x; y1 = a.y;
+      }
+      if (e.p2 === movedPiece) {
+        x2 = newX + movedOffset.x; y2 = newY + movedOffset.y;
+      } else {
+        const a = this.getEdgeAnchor(e.p2); x2 = a.x; y2 = a.y;
+      }
       return { e, x1, y1, x2, y2 };
     });
 
@@ -794,9 +862,11 @@ export class BaseLevel extends Phaser.Scene {
     this.graphics.clear();
     this.graphics.lineStyle(2, 0x000000);
     for (const edge of this.edges) {
+      const a1 = this.getEdgeAnchor(edge.p1);
+      const a2 = this.getEdgeAnchor(edge.p2);
       this.graphics.beginPath();
-      this.graphics.moveTo(edge.p1.x, edge.p1.y);
-      this.graphics.lineTo(edge.p2.x, edge.p2.y);
+      this.graphics.moveTo(a1.x, a1.y);
+      this.graphics.lineTo(a2.x, a2.y);
       this.graphics.strokePath();
     }
   }
@@ -951,9 +1021,10 @@ export class BaseLevel extends Phaser.Scene {
         if (this.sidebarCounters[i]) {
           this.sidebarCounters[i].setText(`x${type.count}`);
         }
-        // Grey out sidebar piece if count is 0
+        // Grey out and disable sidebar piece if count is 0
         if (type.count === 0 && this.sidebarPieces && this.sidebarPieces[i]) {
           this.sidebarPieces[i].setTint(this.getDepletedTint());
+          this.sidebarPieces[i].disableInteractive();
         }
       });
     }
