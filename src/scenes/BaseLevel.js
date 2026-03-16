@@ -1153,8 +1153,10 @@ Connect all ${t.pieces} into a single network.
 • Drag ${t.pieces} from the sidebar onto the play area to place them
 • Click two ${t.pieces} to create a ${t.connection} between them
 • Click two connected ${t.pieces} again to remove the ${t.connection}
-• ${t.connections.charAt(0).toUpperCase() + t.connections.slice(1)} cannot cross
 • Drag a ${t.piece} back to the sidebar to remove it
+
+**Planarity:**
+• ${t.connections.charAt(0).toUpperCase() + t.connections.slice(1)} cannot cross
 
 **Objective:**
 Build a connected network where each ${t.piece} has exactly the right number of ${t.connections}.`;

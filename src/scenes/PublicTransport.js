@@ -110,8 +110,10 @@ Footpaths can only connect stops of different types. There's no point building a
 • Drag stops from the sidebar onto the map to place them
 • Click two stops to connect them with a footpath
 • Click two connected stops again to remove the footpath
-• Footpaths cannot cross — no tangled walkways!
 • Drag a stop back to the sidebar to remove it
+
+**Planarity:**
+• Footpaths cannot cross — no tangled walkways!
 
 **Objective:**
 Build a connected network of footpaths where every stop has the right number of connections and no two stops of the same type are directly linked.`;

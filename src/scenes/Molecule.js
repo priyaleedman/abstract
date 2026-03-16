@@ -102,8 +102,10 @@ You are a researcher tasked with building a caffeine molecule (C₈H₁₀N₄O�
 • Click two atoms to create a bond between them
 • Click two bonded atoms again to remove the bond
 • Only atoms that follow the bonding rules can be connected
-• Bonds cannot cross — molecules are flat structures!
 • Drag an atom back to the sidebar to remove it
+
+**Planarity:**
+• Bonds cannot cross — molecules are flat structures!
 
 **Objective:**
 Build a connected caffeine molecule where every atom has exactly the right number of bonds.`;

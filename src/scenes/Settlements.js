@@ -81,8 +81,10 @@ You are building a network of settlements in a new area. Each settlement can sup
 • Drag settlements from the sidebar onto the play area to place them
 • Click two settlements to connect them with a road
 • Click two connected settlements again to remove the road
-• Roads cannot cross since the terrain is too rugged for intersections
 • Drag a settlement back to the sidebar to remove it
+
+**Planarity:**
+• Roads cannot cross since the terrain is too rugged for intersections
 
 **Objective:**
 Build a connected network where every settlement has exactly the right number of roads.`;

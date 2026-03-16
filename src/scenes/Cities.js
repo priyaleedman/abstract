@@ -72,8 +72,10 @@ A region of cities needs to be connected by highways. Each city can support a fi
 • Drag cities from the sidebar onto the play area
 • Click two cities to build a highway between them
 • Click two connected cities again to remove the highway
-• Highways cannot cross since we don't have the budget for overpasses
 • Drag a city back to the sidebar to remove it
+
+**Planarity:**
+• Highways cannot cross since we don't have the budget for overpasses
 
 **Objective:**
 Build a connected highway network where every city has exactly the right number of highways.`;

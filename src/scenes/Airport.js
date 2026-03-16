@@ -93,8 +93,10 @@ You are an air traffic controller designing flight routes between airports. Each
 • Drag airports from the sidebar onto the play area
 • Click two airports to create a flight route between them
 • Click two connected airports again to remove the route
-• Flight routes cannot cross — we need to keep the skies safe!
 • Drag an airport back to the sidebar to remove it
+
+**Planarity:**
+• Flight routes cannot cross — we need to keep the skies safe!
 
 **Objective:**
 Build a connected flight network where every airport has exactly the right number of routes.`;

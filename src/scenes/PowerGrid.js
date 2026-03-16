@@ -80,8 +80,10 @@ A region needs its power towers connected into a single network. Each tower has 
 • Drag towers from the sidebar onto the play area
 • Click two towers to run a power line between them
 • Click two connected towers again to remove the power line
-• Power lines cannot cross each other because crossing wires is a safety hazard
 • Drag a tower back to the sidebar to remove it
+
+**Planarity:**
+• Power lines cannot cross each other because crossing wires is a safety hazard
 
 **Objective:**
 Build a connected power grid where every tower has exactly the right number of power lines.`;
