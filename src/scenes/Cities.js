@@ -15,19 +15,19 @@ export class Cities extends BaseLevel {
 
   getPieceTypes() {
     return [
-      { key: 'city1', edges: 1, count: 3, scale: 0.14, sidebarScale: 0.14 },
-      { key: 'city2', edges: 2, count: 3, scale: 0.14, sidebarScale: 0.14 },
-      { key: 'city3', edges: 3, count: 3, scale: 0.14, sidebarScale: 0.14 },
-      { key: 'city4', edges: 4, count: 3, scale: 0.14, sidebarScale: 0.14 },
+      { key: 'city1', edges: 1, count: 3, scale: 0.08, sidebarScale: 0.07 },
+      { key: 'city2', edges: 2, count: 3, scale: 0.08, sidebarScale: 0.07 },
+      { key: 'city3', edges: 3, count: 3, scale: 0.08, sidebarScale: 0.07 },
+      { key: 'city4', edges: 4, count: 3, scale: 0.08, sidebarScale: 0.07 },
     ];
   }
 
   getPieceLabel(pieceKey, edges) {
     const labels = {
-      'city1': 'Hamlet',
-      'city2': 'Town',
-      'city3': 'City',
-      'city4': 'Metropolis',
+      'city1': 'Town',
+      'city2': 'City',
+      'city3': 'Metropolis',
+      'city4': 'Megacity',
     };
     const name = labels[pieceKey] || 'City';
     return `${name}: ${edges} highway${edges !== 1 ? 's' : ''}`;

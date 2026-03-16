@@ -12,7 +12,7 @@ export class Map extends Phaser.Scene {
     this.load.image('green-tick', 'assets/green-tick.PNG');
     this.load.image('green-background', 'assets/green-background.png');
     this.load.image('apple', 'assets/apple.png');
-    this.load.image('airport', 'assets/Airport.PNG');
+    this.load.image('airport', 'assets/Airport4.PNG');
     this.load.image('alice-icon', 'assets/Alice.PNG');
     this.load.image('powertower', 'assets/PowerTower.PNG');
     this.load.image('snail-icon', 'assets/Snail.PNG');
@@ -47,18 +47,18 @@ export class Map extends Phaser.Scene {
     const row1Spacing = width / 4;
 
     this.createLevelButton({
-      levelKey: 'Airport', x: row1Spacing, y: row1Y,
+      levelKey: 'Airport', x: row1Spacing, y: row1Y+ 28,
       imageKey: 'airport', imageScale: 0.08,
-      label: 'Clear for take-off!',
-      labelOffsetY: 85, locked: !unlockedKeys.has('Airport'),
-      bgScale: 2.8, bgOffsetX: 15, bgOffsetY: 25,
-      tickOffsetX: 110, tickOffsetY: -40
+      label: 'Air-planar',
+      labelOffsetY: 55, locked: !unlockedKeys.has('Airport'),
+      bgScale: 2.8, bgOffsetX: 15, bgOffsetY: 20,
+      tickOffsetX: 100, tickOffsetY: -40
     });
 
     this.createLevelButton({
       levelKey: 'SocialNetwork', x: centerX, y: row1Y,
       imageKey: 'alice-icon', imageScale: 0.38,
-      label: 'It\'s who you know',
+      label: 'Degrees of connection',
       labelOffsetY: 85, locked: !unlockedKeys.has('SocialNetwork'),
       bgScale: 0.6, bgOffsetX: 10, bgOffsetY: 25,
       tickOffsetX: 70, tickOffsetY: -40
@@ -67,7 +67,7 @@ export class Map extends Phaser.Scene {
     this.createLevelButton({
       levelKey: 'PowerGrid', x: width - row1Spacing, y: row1Y,
       imageKey: 'powertower', imageScale: 0.07,
-      label: 'Watt a connection!', labelOffsetY: 80,
+      label: 'Ohm-azing circuits', labelOffsetY: 80,
       bgScale: 3, bgOffsetY: 30, tickOffsetX: 60,
       locked: !unlockedKeys.has('PowerGrid')
     });
@@ -87,10 +87,10 @@ export class Map extends Phaser.Scene {
 
     this.createLevelButton({
       levelKey: 'Cities', x: width - row2Offset, y: row2Y,
-      imageKey: 'city-icon', imageScale: 0.16,
+      imageKey: 'city-icon', imageScale: 0.08,
       label: 'Highway to the\ngraph zone',
       labelOffsetY: 75, locked: !unlockedKeys.has('Cities'),
-      bgScale: 1.4, bgOffsetY: 50,
+      bgScale: 2.8, bgOffsetY: 40,
       tickOffsetX: 65, tickOffsetY: -25
     });
 

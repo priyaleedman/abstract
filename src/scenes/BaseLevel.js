@@ -152,6 +152,14 @@ export class BaseLevel extends Phaser.Scene {
   }
 
   /**
+   * Override to customise the tint applied to sidebar pieces when their count reaches 0.
+   * @returns {number} Hex colour used as the depletion tint
+   */
+  getDepletedTint() {
+    return 0x888888;
+  }
+
+  /**
    * Override this method in child classes to hide the "x N" piece count badge
    * in the sidebar (useful when each piece type has only one instance).
    * @returns {boolean} Whether to show the count label next to each sidebar piece
@@ -245,7 +253,7 @@ export class BaseLevel extends Phaser.Scene {
 
       // Grey out piece if count is already 0 (e.g., when viewing solved level)
       if (type.count === 0) {
-        piece.setTint(0x888888);
+        piece.setTint(this.getDepletedTint());
       }
 
       // Hover effect for sidebar pieces and counter
@@ -316,7 +324,7 @@ export class BaseLevel extends Phaser.Scene {
           type.count -= 1;
           if (counterText) counterText.setText(`x${type.count}`);
           if (type.count === 0) {
-            piece.setTint(0x888888);
+            piece.setTint(this.getDepletedTint());
           }
           this.saveProgress();
         }
@@ -581,7 +589,7 @@ export class BaseLevel extends Phaser.Scene {
 
     // No current selection → select this piece
     if (!this._highlightedPiece) {
-      piece.setTint(0x888888);
+      piece.setTint(this.getDepletedTint());
       this._highlightedPiece = piece;
       this.selectedPiece = piece;
       return;
@@ -945,7 +953,7 @@ export class BaseLevel extends Phaser.Scene {
         }
         // Grey out sidebar piece if count is 0
         if (type.count === 0 && this.sidebarPieces && this.sidebarPieces[i]) {
-          this.sidebarPieces[i].setTint(0x888888);
+          this.sidebarPieces[i].setTint(this.getDepletedTint());
         }
       });
     }

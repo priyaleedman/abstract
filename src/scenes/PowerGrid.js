@@ -33,6 +33,10 @@ export class PowerGrid extends BaseLevel {
     return `${name}: ${edges} line${edges !== 1 ? 's' : ''}`;
   }
 
+  getDepletedTint() {
+    return 0x444444;
+  }
+
   getBadgeOffset() {
     return { xOffset: 55, yOffset: -60 };
   }
