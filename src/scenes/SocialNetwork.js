@@ -75,13 +75,19 @@ export class SocialNetwork extends BaseLevel {
   }
 
   create(data) {
-    super.create(data);
+    // Must initialise hint state BEFORE super.create() because loadProgress()
+    // calls spawnPiece() → onPiecePlaced() which reads _hintDismissed.
     this._hintDismissed = {
       drag: localStorage.getItem('hint_drag_dismissed') === 'true',
       connect: localStorage.getItem('hint_connect_dismissed') === 'true',
     };
+    this._restoringProgress = true;
+    super.create(data);
+    this._restoringProgress = false;
+
     // Show first hint after a short delay if not already dismissed
-    if (!this._hintDismissed.drag && !this.isViewingSolved) {
+    // and no pieces were restored from saved progress
+    if (!this._hintDismissed.drag && !this.isViewingSolved && this.pieces.length === 0) {
       this.time.delayedCall(500, () => this.showHint('Try dragging a person from the sidebar to place them on the board.'));
     }
   }
@@ -112,6 +118,7 @@ export class SocialNetwork extends BaseLevel {
   }
 
   onPiecePlaced(piece) {
+    if (this._restoringProgress) return;
     if (!this._hintDismissed.drag) {
       this._hintDismissed.drag = true;
       localStorage.setItem('hint_drag_dismissed', 'true');
