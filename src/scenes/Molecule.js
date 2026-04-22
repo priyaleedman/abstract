@@ -64,6 +64,8 @@ export class Molecule extends BaseLevel {
     return { xOffset: 50, yOffset: -25 };
   }
 
+  getMinPiecePlacementDistance() { return 40; }
+
   getTerminology() {
     return {
       piece: 'atom',

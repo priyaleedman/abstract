@@ -359,7 +359,7 @@ export class BaseLevel extends Phaser.Scene {
 
         if (inGameplay && type.count > 0) {
           // Check if drop location overlaps an existing piece
-          const minDist = 60;
+          const minDist = this.getMinPiecePlacementDistance();
           const overlapping = this.pieces.some(other => {
             const dx = dropX - other.x;
             const dy = dropY - other.y;
@@ -901,6 +901,9 @@ export class BaseLevel extends Phaser.Scene {
     // Default: no additional conditions
     return true;
   }
+
+  /** Minimum distance (px) between placed pieces — override in subclasses to adjust */
+  getMinPiecePlacementDistance() { return 60; }
 
   /** Called after a piece is placed on the board from the sidebar */
   onPiecePlaced(piece) {}
